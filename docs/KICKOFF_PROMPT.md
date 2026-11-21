@@ -32,9 +32,10 @@ Use them: `animate` + `choreograph` before writing any motion, `emil-design-eng`
 ## PART A: Setup, research and assets (allowed before 23 Nov; no source code)
 
 A1. Inspiration (Pinterest, via the Chrome browser tools; I am signed in to Pinterest in Chrome).
-    Search boards for: "fintech app dark UI", "scrollytelling landing page", "phone mockup
-    parallax", "bank notification UI", "brutalist sharp corners web design", "electric blue
-    navy website", "African fintech app". Pick the 15–20 strongest references.
+    Start with the pin Fuhad loves: https://www.pinterest.com/pin/622270873558113007/
+    (Ledger animated hero; it is the model for Section 1). Then search boards for: "fintech app light UI", "scrollytelling landing page", "phone mockup
+    parallax", "bank notification UI", "brutalist sharp corners web design", "light minimal
+    website electric blue", "African fintech app". Pick the 15–20 strongest references.
     Write docs/inspo/README.md: for each, the Pinterest URL, one line on what to borrow
     (layout, motion, colour, type), and which landing-page section (1–9 in DESIGN.md) it serves.
     Do NOT download or commit Pinterest images.
