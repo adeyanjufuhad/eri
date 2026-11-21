@@ -7,12 +7,14 @@ The motion reference is **Blox Studio** (https://bloxweb-production.up.railway.a
 - **Scroll-pinned "simulation" sections.** Each feature section is very tall (`h-[320vh]` to `h-[520vh]`) with a **sticky stage** inside. As you scroll, a mock product UI on the stage plays out step by step, as if someone is using it: a cursor moves, elements get dragged, panels open, values change. Scroll position drives the timeline (scrubbed, not time-based).
 - **Word-by-word text reveal.** Big headlines where words go from dim to full colour as you scroll ("Other tools make you learn animation. Here it's clicks…").
 - **Sharp geometry.** `--radius: 0`. Square cards, square buttons, hard edges.
-- **Dark navy base with one electric-blue accent**, plus light mode.
+- **One electric-blue accent** on a calm base. Blox defaults to dark; **Eri is light-first** (Fuhad's call, 21 Nov).
 - **Heavy display type** for the hero, clean grotesk for body.
 
 Eri borrows the **pattern and the tokens**, not Blox's content or brand. Eri's stage is a **phone**, not an editor.
 
 ## Tokens (adapted from the reference)
+
+**Eri is light-themed** on both the website and the app. Light tokens are the default. `.dark` is kept only for the footer band and an optional dark mode later.
 
 ```css
 :root {                       /* light */
@@ -65,7 +67,7 @@ Eri borrows the **pattern and the tokens**, not Blox's content or brand. Eri's s
 - Respect `prefers-reduced-motion`: pinned sections become static step cards.
 - Every animation must explain the product. Decoration-only motion gets removed (`remove-animations` skill).
 
-**Flutter app** uses the same tokens (`ThemeData` + `ThemeExtension` for verdict colours), square corners, Lexend + Inter via `google_fonts`.
+**Flutter app** is light-themed: `ThemeData(brightness: Brightness.light)` built from the light tokens, `ThemeExtension` for verdict colours, square corners, Lexend + Inter via `google_fonts`. Background `#e5eaf2`, cards `#ffffff`, text `#0f141d`, accent `#3b5bff`.
 
 ## Stack (web)
 
@@ -80,7 +82,7 @@ Each "pinned" section = tall wrapper (`h-[300vh]`–`h-[450vh]`) + `sticky top-0
 
 | # | Section | Height | What plays as you scroll |
 |---|---|---|---|
-| 1 | **Hero**: "PROOF, NOT SCREENSHOTS." | 100vh | Phone floats in with parallax layers (phone, notification cards, ₦ glyphs at different depths). Subline: "Eri reads your bank alerts, logs every sale, and catches fake payments. You touch nothing." CTA: Join the waitlist / Download APK. |
+| 1 | **Hero**: "PROOF, NOT SCREENSHOTS." | 100vh + 150vh exit | **Based on Fuhad's favourite reference** ([Ledger animated hero, Pinterest](https://www.pinterest.com/pin/622270873558113007/)): light page, centred headline + two buttons, and below it a **stage of electric-blue `#3b5bff` with a white square grid** (fits our sharp-corner system). A phone rises out of the grid showing the Eri dashboard (*₦412,000 this week · 23 sales · 0 fakes*). From the left, a fan of **bank-alert cards** (GTBank, OPay, Moniepoint, Kuda credit alerts, built in code as 3D-tilted DOM cards) slides in; from the right, **3D gold ₦ coins** (Flow asset) tumble in; a small "Credit ₦25,000" chip pops off the phone. On scroll, each layer moves at a different speed (parallax depth), then the phone detaches and travels into Section 3's pinned stage (shared-element handoff). |
 | 2 | **Word reveal** | 200vh | "Customers send screenshots. Screenshots lie. **Bank alerts don't.**" Words light up one by one. |
 | 3 | **The alert lands** (pinned) | 400vh | Notification slides down: *GTBank: Credit ₦25,000 from CHIOMA OKAFOR, "ankara gown"*. Eri card picks it up → matches *Ankara Gown* (highlight) → stock ticks 4→3 → profit counter +₦7,500. A finger icon *doesn't* tap anything: label "0 taps". |
 | 4 | **The fake** (pinned) | 400vh | Two identical receipts side by side. Scan line passes over both. Left gets ✅ *Landed 2:14 PM*. Right gets ❌ *No matching credit · amount edited*. Reasons type out. |
@@ -88,10 +90,10 @@ Each "pinned" section = tall wrapper (`h-[300vh]`–`h-[450vh]`) + `sticky top-0
 | 6 | **The books write themselves** | 350vh | P&L chart draws itself; sales, cost, expenses and net profit count up; low-stock chip pops in. |
 | 7 | **Canary network** | 300vh | Map of Nigeria, dots for vendors. One vendor catches a fake → pulse travels → another vendor gets *Flagged by 3 Eri vendors this week*. |
 | 8 | **Privacy** | 100vh | "Your alerts never leave your phone." On-device diagram: raw text stays inside the phone outline; only ₦ amounts and matches cross the line. |
-| 9 | **Eri Score + CTA** | 100vh | Instagram bio with an Eri link → morphs into the verified score page. Waitlist form. Footer (`--footer` background). |
+| 9 | **Eri Score + CTA** | 100vh | Instagram bio with an Eri link → morphs into the verified score page. Waitlist form. Footer as a single dark band (`--footer`) for contrast; everything else stays light. |
 
 ## Visual assets
 
-- **Google Flow:** hero background loops (abstract navy/blue light trails, market-to-phone motion), phone mockup renders, Nigerian vendor lifestyle shots (packing orders, phone on table with notification). Export MP4 (≤8MB each for web) + WebP stills. Every generated asset gets an entry in `docs/ASSETS.md` (prompt, date, file).
+- **Google Flow:** light, airy imagery to match the light theme: hero background loops (soft off-white with electric-blue light trails), daylight product shots, phone mockup renders, Nigerian vendor lifestyle shots (packing orders, phone on table with notification). Export MP4 (≤8MB each for web) + WebP stills. Every generated asset gets an entry in `docs/ASSETS.md` (prompt, date, file).
 - **Pinterest:** moodboard only. Save links and short notes in `docs/inspo/README.md`. Do not commit downloaded Pinterest images (copyright).
 - No photos of real public figures. No other brands' logos except bank names in plain text inside mock notifications.

@@ -45,10 +45,11 @@ A2. Motion reference. Open https://bloxweb-production.up.railway.app/ in the bro
     we'll translate that into Eri's phone-based sections. Borrow the pattern, never its content.
 
 A3. Visual assets with Google Flow (I am signed in to Google in Chrome; open https://labs.google/fx/tools/flow).
-    Generate, in our palette (navy #171d27, electric blue #3b5bff, white), no text in images:
-    - 2 hero background loops (8s, seamless, abstract blue light trails / depth layers)
-    - 3 stills: an Android phone on a wooden table beside packed orders (nylon bags, tape),
-      a Nigerian online vendor packing clothes at night by ring light, close-up of a hand
+    The site and app are LIGHT-themed. Generate in our palette (off-white #e5eaf2, white,
+    electric blue #3b5bff, ink #0f141d), bright daylight, no text in images:
+    - 2 hero background loops (8s, seamless, soft off-white with electric-blue light trails)
+    - 3 stills: an Android phone on a light wooden table beside packed orders (nylon bags, tape),
+      a Nigerian online vendor packing clothes in a bright room, close-up of a hand
       holding a phone with a glowing notification (screen content blank, we composite UI later)
     - 1 short loop (6–8s): a parcel being taped and labelled, warm light
     Download the best take of each to docs/assets-staging/. Log every prompt, date and

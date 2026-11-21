@@ -47,7 +47,8 @@ Built for the **Mavuly Hackathon 2026** (build window 23–29 Nov 2026, submit b
 
 ## Design
 
-- Follow `docs/DESIGN.md` exactly: sharp corners (`--radius: 0`), navy + electric blue `#3b5bff`, Lexend display, Inter body, verdict colours (landed / not-received / suspicious).
+- **Light theme** for both the app and the website (light tokens are the default; dark only for the footer band).
+- Follow `docs/DESIGN.md` exactly: sharp corners (`--radius: 0`), off-white `#e5eaf2` / white surfaces + electric blue `#3b5bff`, Lexend display, Inter body, verdict colours (landed / not-received / suspicious).
 - Before writing any animation, read `.claude/skills/animate/SKILL.md` and `.claude/skills/choreograph/SKILL.md`. For polish, `emil-design-eng`. After a section is done, run `review-animations`. For Flutter motion, apply the same principles (curves, durations, interruptibility) even though `animate-expo` targets React Native.
 - Respect `prefers-reduced-motion` (web) and `MediaQuery.disableAnimations` (Flutter).
 
