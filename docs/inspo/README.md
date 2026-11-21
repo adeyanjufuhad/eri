@@ -12,7 +12,7 @@ https://bloxweb-production.up.railway.app/
 - `--radius: 0` everywhere, Lexend display type, navy `#171d27` + electric blue `#3b5bff`, square buttons.
 - **Eri translation:** the stage is a **phone**; the "cursor" is a bank notification and the matching engine; scrolling plays a sale being logged, a fake being caught, a claim timing out. See `docs/DESIGN.md` storyboard.
 
-## Pinterest (searched 21 Nov 2026)
+## Pinterest (first pass, dark-theme searches, 21 Nov 2026; kept for reference, the light picks are below)
 
 Open each search, pick the 2–3 strongest pins per row, and add their URL + what to borrow to the table at the bottom. The pin IDs below are the top results for each search when they were collected. Open them before relying on them, because results change.
 
@@ -27,8 +27,28 @@ Open each search, pick the 2–3 strongest pins per row, and add their URL + wha
 | [african fintech app ui](https://www.pinterest.com/search/pins/?q=african%20fintech%20app%20ui) | Tone, people, copy voice | [1](https://www.pinterest.com/pin/880031583456934319/) · [2](https://www.pinterest.com/pin/703687510567644331/) · [3](https://www.pinterest.com/pin/584623595419027947/) |
 | [inventory profit dashboard mobile app dark](https://www.pinterest.com/search/pins/?q=inventory%20profit%20dashboard%20mobile%20app%20dark) | 6 Books write themselves; app dashboard | [1](https://www.pinterest.com/pin/350577152266452519/) · [2](https://www.pinterest.com/pin/939211697325600399/) · [3](https://www.pinterest.com/pin/886786982905643692/) · [4](https://www.pinterest.com/pin/1036953882953460237/) |
 
-## Chosen references
+## Chosen references (light-theme pass, 21 Nov 2026)
 
-| URL | What to borrow | Section |
-|---|---|---|
-| | | |
+Picked from the seven light-theme searches in KICKOFF_PROMPT A1, signed in to Pinterest in Chrome. Screenshots kept timing out, so most picks are from Pinterest's own pin descriptions. **Give each a quick visual check before using it** and delete any that look wrong.
+
+| # | URL | What to borrow | Section |
+|---|---|---|---|
+| 1 | https://www.pinterest.com/pin/622270873558113007/ | **The model.** Ledger animated hero: camera dives into the phone while payment notifications pop in over 3D coins and cards. Light page, blue grid stage. Layout + motion. | 1 Hero |
+| 2 | https://www.pinterest.com/pin/1107181889669418207/ | Polished 3D moment with scroll animation (Flowty). Motion: object turns as you scroll. | 1 Hero exit, 3 |
+| 3 | https://www.pinterest.com/pin/1107181889670838573/ | Scrollytelling page with a hero object that travels between sections. Shared-element handoff. | 1 → 3 handoff |
+| 4 | https://www.pinterest.com/pin/333759022406823529/ | Phone-mockup landing animation. Phone staging and scale. | 1, 3 |
+| 5 | https://www.pinterest.com/pin/1091208184864955406/ | Hand holding a phone, blank screen, white bg. Reference for the Flow "hand + phone" still. | 3 Alert lands |
+| 6 | https://www.pinterest.com/pin/1101833865111960768/ | Hand gripping the phone from the top, focus on the screen. Crop for the phone stage. | 3, 5 |
+| 7 | https://www.pinterest.com/pin/932315560384275349/ | "Account updates as they happen" notification screen. Notification card layout and hierarchy. | 3 Alert lands |
+| 8 | https://www.pinterest.com/pin/902690319089366010/ | Banking exploration (@that.design.life). Card + amount type scale for the Eri dashboard. | App dashboard, 6 |
+| 9 | https://www.pinterest.com/pin/1100145015255582944/ | Pay balance app. Big balance number + recent activity list. Type and number styling. | App dashboard, 1 phone screen |
+| 10 | https://www.pinterest.com/pin/930204498051248709/ | Zenvest fintech app (balance, income/expense, history). Light fintech colour use. | App, 6 Books |
+| 11 | https://www.pinterest.com/pin/666040232440996082/ | Finance app design (@sujon.co). Light card stack and spacing. | App screens |
+| 12 | https://www.pinterest.com/pin/1030479958508079999/ | Hand + phone on a solid blue background. Colour blocking for the blue hero stage. | 1 Hero, 9 CTA |
+| 13 | https://www.pinterest.com/pin/1126462925580460067/ | Light cyber-brutalism UI (Vercel style). Sharp corners, hairline borders, mono labels on light. | Global layout, grids |
+| 14 | https://www.pinterest.com/pin/1150951248551126147/ | Brutalist UI/UX page. Hard grid, oversized type. | 2 Word reveal, section titles |
+| 15 | https://www.pinterest.com/pin/1141169993127162895/ | "Code meets character" in blue and white. Electric blue on white with heavy display type. | Colour + type system |
+| 16 | https://www.pinterest.com/pin/929148966845556885/ | White and blue page, "great design is a force of nature". Calm white space + one blue accent. | 8 Privacy, 9 CTA |
+| 17 | https://www.pinterest.com/pin/586101339050514963/ | African fintech ad: woman holding a phone, "don't wait for confirmation". Tone and people, close to Eri's message. | 2, 5, social |
+| 18 | https://www.pinterest.com/pin/880031583456934494/ | African fintech landing page with money coming out of the phone. Like our coins + alerts hero. | 1 Hero |
+| 19 | https://www.pinterest.com/pin/1090363759819307659/ | Cross-border Africa app (GHS/ZAR), phone in hand. Copy voice and local feel. | 9 CTA, copy |
