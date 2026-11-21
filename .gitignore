@@ -1,0 +1,24 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+*.keystore
+key.properties
+google-services.json
+
+# web
+web/node_modules/
+web/.next/
+web/out/
+.vercel
+
+# flutter
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/android/.gradle/
+app/android/local.properties
+
+# os
+.DS_Store
