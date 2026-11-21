@@ -39,4 +39,23 @@ React Bits = MIT + Commons Clause (fine for a product; we can't resell the compo
 | Dot Grid (alt: vendor dots as a field) | React Bits | https://reactbits.dev/backgrounds/dot-grid | MIT + Commons Clause | 7 Canary | shortlisted |
 | Bio → score morph | Hand-rolled `motion/react` `layoutId` | — | ours | 9 Eri Score | shortlisted (no lib needed) |
 
+### In the site (21 Nov 2026)
+
+Copied unchanged into `web/components/reactbits/`, each with a header naming its source and licence. That folder is excluded from lint because the published code trips two React hook rules.
+
+| Component | Library | Source | License | Used in section | Status |
+|---|---|---|---|---|---|
+| Tilted Card | React Bits | https://reactbits.dev/r/TiltedCard-TS-TW.json | MIT + Commons Clause | 1 Hero: bank alert cards tilt and catch glare under the mouse | used |
+| Scroll Reveal | React Bits | https://reactbits.dev/r/ScrollReveal-TS-TW.json | MIT + Commons Clause | 2 Word reveal (section is no longer pinned) | used |
+| Count Up | React Bits | https://reactbits.dev/r/CountUp-TS-TW.json | MIT + Commons Clause | 3 Alert lands: profit ₦12,000 → ₦19,500 (`count`), stock 4 → 3 (`roll`) | used |
+| Text Type | React Bits | https://reactbits.dev/r/TextType-TS-TW.json | MIT + Commons Clause | 4 The fake: verdict reasons type out | used |
+| Stacked bars | Bencho (free) | https://github.com/cabralorenzo/bencho/tree/main/blocks/stacked-bars | MIT | 6 Books: 7-day P&L (profit + cost + expenses per day, fakes caught under the baseline), Day/Week switch, hover breakdown. Adapted: Eri data and labels, sharp corners, Eri colours, no bar on zero-fake days. Lives in `web/components/bencho/`. | used |
+
+Checked and not used:
+- World Map (Aceternity) and Dot Grid (React Bits): §7 needs Nigeria alone, not a crop of a world map, so the map is drawn in-house: a simplified border filled with a square dot grid (`web/components/canary.tsx`).
+- Container Scroll Animation (Aceternity): would replace the hand-holding-phone hero. Ask Fuhad before swapping.
+- Scanner (React Bits): a full-screen WebGL shader background, not a scan line across a card. §4 keeps its CSS scan line.
+- Toast stack (Bencho, MIT, free): toast text is hard-coded and it fans out on hover; doesn't fit the single alert in §3.
+- Rolling counter (Bencho, MIT, free): a +/- number input, not a display. Count Up's roll mode covers §3.
+
 Not opened yet: BoardUI, HorizonX (paid), ObsidianUI and transitions.dev. Every section is already covered above, so only open them if a shortlisted piece fails on Day 5–6.

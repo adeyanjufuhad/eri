@@ -52,3 +52,24 @@ Picked from the seven light-theme searches in KICKOFF_PROMPT A1, signed in to Pi
 | 17 | https://www.pinterest.com/pin/586101339050514963/ | African fintech ad: woman holding a phone, "don't wait for confirmation". Tone and people, close to Eri's message. | 2, 5, social |
 | 18 | https://www.pinterest.com/pin/880031583456934494/ | African fintech landing page with money coming out of the phone. Like our coins + alerts hero. | 1 Hero |
 | 19 | https://www.pinterest.com/pin/1090363759819307659/ | Cross-border Africa app (GHS/ZAR), phone in hand. Copy voice and local feel. | 9 CTA, copy |
+
+## Round 2: futuristic hero + blocky curved logo (21 Nov 2026, built-in browser)
+
+Fuhad asked for a less tidy, more futuristic hero, and a black-and-white logo that is "blocky and curved".
+
+| # | URL | What to borrow | Use |
+|---|---|---|---|
+| L1 | https://www.pinterest.com/pin/472033604715378560/ | Square block with the "e" cut out as negative space: a half-round counter and a slot. The closest to "blocky curved". | Logo mark |
+| L2 | https://www.pinterest.com/pin/470274386112192652/ | Same idea reversed: white block on black, e from a half-circle and a bar. | Logo on dark |
+| L3 | https://www.pinterest.com/pin/473792823319120370/ | Rounded pixel blocks snapped to a grid. Proves a mark can be built from one block size. | Logo construction |
+| L4 | https://www.pinterest.com/pin/464152305363052359/ | Four quarter-circle blocks making one form. | Logo curves |
+| L5 | https://www.pinterest.com/pin/1113655814129467663/ | Chunky curved letters on a cube's faces, B&W. | Wordmark weight |
+| L6 | https://www.pinterest.com/pin/611715561928308621/ | Curved strokes inside a hard cube, white on black. | App icon on dark |
+| L7 | https://www.pinterest.com/pin/1093319247068779639/ | Heavy rounded "e" with a tiny aperture. | Wordmark "e" |
+| H1 | https://www.pinterest.com/pin/965599976383554814/ | Giant faded wordmark behind the subject; the subject overlaps the type. | Hero depth |
+| H2 | https://www.pinterest.com/pin/391039180166639485/ | Name set huge at the bottom edge, cropped, person cutting through it. | Hero type scale |
+| H3 | https://www.pinterest.com/pin/949204059009354997/ | Full-bleed wordmark + bold stat numbers (1000+, 40+) in a hard grid. | Hero stats row |
+| H4 | https://www.pinterest.com/pin/1078471442027698895/ | Headline split left/right with the image wedged between the words. | Hero layout |
+| H5 | https://www.pinterest.com/pin/1151936410991794997/ | "BOLD NEW FORMS": loud type on one strong colour field with a figure in front. | Blue stage + type |
+
+**Direction we're taking:** keep it light and keep the blue grid, but break the tidiness. Huge cropped type behind the hand (depth), a live alert ticker band across the stage, HUD-style mono labels at the grid corners, and the new blocky-curved logo.

@@ -31,9 +31,9 @@ Eri borrows the **pattern and the tokens**, not Blox's content or brand. Eri's s
   --primary-foreground: #ffffff;
   --ring: #3b5bff;
   /* Eri verdict colours */
-  --landed: #3d9c5e;          /* ✅ money arrived */
-  --not-received: #d9312f;    /* ❌ no money */
-  --suspicious: #c98a0b;      /* ⚠️ mismatch */
+  --landed: #2b7a47;          /* ✅ money arrived (darkened 21 Nov for 4.5:1 contrast on white) */
+  --not-received: #c62b29;    /* ❌ no money */
+  --suspicious: #966500;      /* ⚠️ mismatch */
 }
 .dark {
   --background: #171d27;
