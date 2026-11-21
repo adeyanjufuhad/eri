@@ -1,7 +1,7 @@
 # Generated Assets Log
 
 Google Flow project: **"Nov 21 - 10:04"** (rename it to "Eri landing assets"), https://flow.google.com/project/9f2317b9-226c-44f8-993e-afb2404b3b0e
-Model: Nano Banana 2.1 (Flow default), 2 takes per prompt. Files are still in Flow and need downloading on Day 1 into `web/public/media/` (WebP, ≤300KB each).
+Model: Nano Banana 2.1 (Flow default), 2 takes per prompt. All 8 takes are downloaded to `docs/assets-staging/` as WebP (`eri-hero-light-1/2`, `eri-vendor-packing-1/2`, `eri-naira-coins-1/2`, `eri-phone-dark-1/2`). On Day 1, move the chosen ones into `web/public/media/`. The coins need background removal before use.
 
 | # | Asset | Prompt (short) | Take to use | Size | Used in |
 |---|---|---|---|---|---|
