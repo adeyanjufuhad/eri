@@ -73,3 +73,20 @@ Fuhad asked for a less tidy, more futuristic hero, and a black-and-white logo th
 | H5 | https://www.pinterest.com/pin/1151936410991794997/ | "BOLD NEW FORMS": loud type on one strong colour field with a figure in front. | Blue stage + type |
 
 **Direction we're taking:** keep it light and keep the blue grid, but break the tidiness. Huge cropped type behind the hand (depth), a live alert ticker band across the stage, HUD-style mono labels at the grid corners, and the new blocky-curved logo.
+
+## Round 3: curves, calm, problem → solution (22 Nov 2026, built-in browser)
+
+Fuhad finds the radius-0 brutalist page too blocky and messy. Read each site's H1 and sampled computed `border-radius` (no screenshots). Cash App, Monzo and Brex blocked the fetch.
+
+| # | URL | H1 (first screen) | Radius sampled | What to borrow |
+|---|---|---|---|---|
+| R1 | https://mercury.com | "Radically different banking" | CTAs 40px pills, cards 12px, big panels 32px | Two radii only: pill for actions, soft card for content. "Banking's been a headache. Now, it's a head start." Pain named, then answered. |
+| R2 | https://linear.app | "The product development system…" | buttons 9999px pills, cards 8–12px | Calm dark-on-light rhythm, one product mockup per section, short labelled chapters. |
+| R3 | https://wise.com | "Send money globally for less" | CTAs 9999px pills, cards 24px | Hero shows the real thing working (live calculator). Problem → solution via a plain comparison with numbers. |
+| R4 | https://stripe.com | "Financial infrastructure to grow your revenue." | small 4–6px | Bento tiles, each a tiny live UI demo (fraud score, billing). Borrow the "every tile proves one claim" rule, not the small radius. |
+| R5 | https://www.ramp.com | "Time is money. Save both." | 6px / 12px | A two-beat headline that states the pain and the promise in five words. |
+| R6 | https://moniepoint.com | "Simple solutions to power your business" | 8px controls, 12–20px cards | Nigerian SME tone; soft cards around plain feature lists. |
+| R7 | https://paystack.com | "Modern online and offline payments for Africa" | small 2–5px, 60px pill CTA | One clear pill CTA on a calm page; African fintech voice. |
+| R8 | https://kuda.com | "The digital bank built for Nigerians" | 4px, cards 21px | Three numbered blocks (Send / Spend / Save), then a "Kuda vs others" table. Numbered steps = our 1-2-3. |
+
+**Direction we're taking:** a radius scale (10 / 16 / 24 / 32px + pill), pill buttons and tags, rounded stage and cards, one surface per section with more white space, and no HUD crosshairs, faint grids or rotated ticker. The first screen names the problem (fake "I've paid" screenshots) next to the answer (the real alert), like Wise and Mercury do.
