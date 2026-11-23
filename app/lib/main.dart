@@ -35,9 +35,15 @@ class _EriAppState extends ConsumerState<EriApp> {
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => _Tabs(shell),
         branches: [
-          StatefulShellBranch(routes: [GoRoute(path: '/', builder: (_, _) => const HomeScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/products', builder: (_, _) => const ProductsScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/orders', builder: (_, _) => const OrdersScreen())]),
+          StatefulShellBranch(
+            routes: [GoRoute(path: '/', builder: (_, _) => const HomeScreen())],
+          ),
+          StatefulShellBranch(
+            routes: [GoRoute(path: '/products', builder: (_, _) => const ProductsScreen())],
+          ),
+          StatefulShellBranch(
+            routes: [GoRoute(path: '/orders', builder: (_, _) => const OrdersScreen())],
+          ),
         ],
       ),
       GoRoute(path: '/welcome', builder: (_, _) => const WelcomeScreen()),
@@ -56,10 +62,12 @@ class _EriAppState extends ConsumerState<EriApp> {
     // alerts that arrive while Eri is open
     _pings = ref.read(bridgeProvider).pings.listen((_) => _drain());
     // alerts that arrived while it was closed, and permission granted in Settings
-    _life = AppLifecycleListener(onResume: () {
-      ref.invalidate(permissionProvider);
-      _drain();
-    });
+    _life = AppLifecycleListener(
+      onResume: () {
+        ref.invalidate(permissionProvider);
+        _drain();
+      },
+    );
   }
 
   Future<void> _drain() async {
@@ -80,12 +88,8 @@ class _EriAppState extends ConsumerState<EriApp> {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp.router(
-        title: 'Eri',
-        debugShowCheckedModeBanner: false,
-        theme: eriTheme(),
-        routerConfig: _router,
-      );
+  Widget build(BuildContext context) =>
+      MaterialApp.router(title: 'Eri', debugShowCheckedModeBanner: false, theme: eriTheme(), routerConfig: _router);
 }
 
 class _Tabs extends StatelessWidget {
@@ -94,15 +98,21 @@ class _Tabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: shell,
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: shell.currentIndex,
-          onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.today_outlined), selectedIcon: Icon(Icons.today), label: 'Today'),
-            NavigationDestination(icon: Icon(Icons.inventory_2_outlined), selectedIcon: Icon(Icons.inventory_2), label: 'Products'),
-            NavigationDestination(icon: Icon(Icons.receipt_outlined), selectedIcon: Icon(Icons.receipt), label: 'Orders'),
-          ],
+    body: shell,
+    bottomNavigationBar: NavigationBar(
+      // tabs switch dozens of times a day: the content swaps instantly, the indicator barely moves
+      animationDuration: const Duration(milliseconds: 150),
+      selectedIndex: shell.currentIndex,
+      onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+      destinations: const [
+        NavigationDestination(icon: Icon(Icons.today_outlined), selectedIcon: Icon(Icons.today), label: 'Today'),
+        NavigationDestination(
+          icon: Icon(Icons.inventory_2_outlined),
+          selectedIcon: Icon(Icons.inventory_2),
+          label: 'Products',
         ),
-      );
+        NavigationDestination(icon: Icon(Icons.receipt_outlined), selectedIcon: Icon(Icons.receipt), label: 'Orders'),
+      ],
+    ),
+  );
 }

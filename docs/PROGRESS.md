@@ -25,3 +25,8 @@
 - **Checked:** `flutter analyze` clean; `flutter test` 44/44, including a widget test that drives the real screens through the Day 2 exit check (₦25,000 "ankara gown" → Sold · +₦7,500 · 3 left, zero taps). Browser preview shows "Needs you" suggestions working.
 - **Not done:** Supabase sync (needs a Supabase project: Fuhad's call, sends data off the phone). Nothing run on a real phone yet (docs/SPIKE.md). Delivery fee setting (engine supports it; no UI yet).
 - **Next:** real-phone spike; then Day 3: "I don pay" chat claims (opt-in), receipt check, debits → expenses.
+
+## Mon 23 Nov 2026 (app motion pass, Emil Kowalski skills)
+- **Done:** motion tokens + helpers (`app/lib/theme/motion.dart`: PressScale, EnterOnce, MoneyTicker, Swap) applied across Today, Products, Orders, sheets and the welcome screen. Rules in `docs/DESIGN.md` (Flutter motion). Calmer ripple, faster tab indicator, no motion on tab switches or steppers. Reduced motion supported.
+- **Also fixed today:** Needs-you suggestions vanished after a cold start (fixed, committed); Undo for every Needs-you choice; feed rows on a Material surface so tap ripples show.
+- **Checked:** analyze clean, 48/48 tests (4 new motion tests incl. reduced motion). Browser preview checked.

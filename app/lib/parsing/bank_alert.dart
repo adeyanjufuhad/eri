@@ -57,8 +57,11 @@ class BankProfile {
 const banks = <BankProfile>[
   BankProfile('GTBank', packages: {'com.gtbank.gtworldv1'}, hints: ['gtbank', 'gtb', 'guaranty trust', 'gtworld']),
   BankProfile('OPay', packages: {'team.opay.pay'}, hints: ['opay']),
-  BankProfile('Moniepoint',
-      packages: {'com.moniepoint.personal', 'com.teamapt.monnify.pos.moniepointapp'}, hints: ['moniepoint']),
+  BankProfile(
+    'Moniepoint',
+    packages: {'com.moniepoint.personal', 'com.teamapt.monnify.pos.moniepointapp'},
+    hints: ['moniepoint'],
+  ),
   BankProfile('Kuda', packages: {'com.kudabank.app'}, hints: ['kuda']),
   BankProfile('PalmPay', packages: {'com.palmpay.android'}, hints: ['palmpay']),
   BankProfile('Zenith', packages: {'com.zenithBank.eazymoney'}, hints: ['zenith']),
@@ -73,23 +76,30 @@ final _labelledAmount = RegExp('\\b(?:amt|amount)\\s*:?\\s*(?:₦|NGN|N)?\\s?$_n
 final _balanceBefore = RegExp(r'(bal(ance)?|avail(able)?)\W{0,3}\w{0,6}\W{0,3}$', caseSensitive: false);
 
 final _creditCue = RegExp(
-    r'\b(cr|credit(ed)?|received|receive|got|inflow|deposit(ed)?|incoming|money in)\b', caseSensitive: false);
+  r'\b(cr|credit(ed)?|received|receive|got|inflow|deposit(ed)?|incoming|money in)\b',
+  caseSensitive: false,
+);
 final _debitCue = RegExp(
-    r'\b(dr|debit(ed)?|sent|withdrawal|withdrawn|purchase|paid to|transfer to|outflow|charged|money out)\b',
-    caseSensitive: false);
+  r'\b(dr|debit(ed)?|sent|withdrawal|withdrawn|purchase|paid to|transfer to|outflow|charged|money out)\b',
+  caseSensitive: false,
+);
 
 // OTPs, tokens and promos mention naira too; they're never a payment.
-final _reject = RegExp(r'\b(otp|token|one[- ]time|verification code|win|promo|bonus|giveaway|loan offer)\b',
-    caseSensitive: false);
+final _reject = RegExp(
+  r'\b(otp|token|one[- ]time|verification code|win|promo|bonus|giveaway|loan offer)\b',
+  caseSensitive: false,
+);
 
 // a name runs until punctuation, a line break, " - ", or the next labelled field
-const _nameEnd = r'(?=\s*(?:[.,|;\n]|\s-\s|\bdesc|\bnarration|\bremark|\bnote\b|\bref|\bsession|\bon\s+\d|\bat\s+\d|\bvia\b|[“"‘]|$))';
+const _nameEnd =
+    r'(?=\s*(?:[.,|;\n]|\s-\s|\bdesc|\bnarration|\bremark|\bnote\b|\bref|\bsession|\bon\s+\d|\bat\s+\d|\bvia\b|[“"‘]|$))';
 final _from = RegExp('\\b(?:from|sender)\\s*:?\\s+([A-Za-z][A-Za-z .\'&-]{1,40}?)$_nameEnd', caseSensitive: false);
 final _to = RegExp('\\b(?:to|beneficiary)\\s*:?\\s+([A-Za-z][A-Za-z .\'&-]{1,40}?)$_nameEnd', caseSensitive: false);
 
 final _labelledNote = RegExp(
-    r'\b(?:desc(?:ription)?|narration|remarks?|note|memo)\s*[:\-]\s*(.+?)(?=\s*(?:\n|\bavail|\bbal|\bdate|\bref|\btime|\bsession|$))',
-    caseSensitive: false);
+  r'\b(?:desc(?:ription)?|narration|remarks?|note|memo)\s*[:\-]\s*(.+?)(?=\s*(?:\n|\bavail|\bbal|\bdate|\bref|\btime|\bsession|$))',
+  caseSensitive: false,
+);
 final _quotedNote = RegExp(r'[“"‘]([^”"’\n]{2,60})[”"’]');
 final _session = RegExp(r'\bsession\s*(?:id)?\s*[:#]?\s*(\d{20,30})\b|\b(\d{30})\b', caseSensitive: false);
 

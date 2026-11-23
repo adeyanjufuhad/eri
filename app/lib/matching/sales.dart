@@ -68,49 +68,61 @@ class Sales {
   /// stock; snapshots unit costs so the profit is fixed from now on. [byUser]: the vendor tapped it;
   /// [manual]: the vendor picked the products themselves.
   Future<void> apply(BankEvent e, Proposal p, {bool byUser = false, bool manual = false}) => db.transaction(() async {
-        if (await _decided(e.id)) return;
-        final int orderId;
-        if (p.orderId != null) {
-          orderId = p.orderId!;
-          await (db.update(db.orders)..where((t) => t.id.equals(orderId)))
-              .write(OrdersCompanion(status: const Value('paid'), paidAt: Value(e.occurredAt)));
-          final items = await (db.select(db.orderItems)..where((t) => t.orderId.equals(orderId))).get();
-          for (final i in items) {
-            final prod = await _product(i.productId);
-            await (db.update(db.orderItems)
-                  ..where((t) => t.orderId.equals(orderId) & t.productId.equals(i.productId)))
-                .write(OrderItemsCompanion(unitCostKobo: Value(prod.avgCostKobo)));
-            await _takeStock(prod, i.qty, orderId);
-          }
-        } else {
-          orderId = await db.into(db.orders).insert(OrdersCompanion.insert(
-                code: await nextOrderCode(),
-                customerName: Value(e.counterparty),
-                status: 'paid',
-                expectedAmountKobo: Value(e.amountKobo),
-                deliveryFeeKobo: Value(p.deliveryFeeKobo),
-                paidAt: Value(e.occurredAt),
-              ));
-          for (final l in p.lines) {
-            final prod = await _product(l.productId);
-            await db.into(db.orderItems).insert(OrderItemsCompanion.insert(
-                  orderId: orderId,
-                  productId: l.productId,
-                  qty: l.qty,
-                  unitPriceKobo: prod.sellPriceKobo,
-                  unitCostKobo: prod.avgCostKobo,
-                ));
-            await _takeStock(prod, l.qty, orderId);
-          }
-        }
-        await db.into(db.matches).insert(MatchesCompanion.insert(
-              bankEventId: e.id,
-              orderId: Value(orderId),
-              kind: manual ? 'manual' : _kindName(p.kind),
-              confidence: byUser ? 1.0 : p.confidence,
-              confirmedByUser: Value(byUser),
-            ));
-      });
+    if (await _decided(e.id)) return;
+    final int orderId;
+    if (p.orderId != null) {
+      orderId = p.orderId!;
+      await (db.update(db.orders)..where((t) => t.id.equals(orderId))).write(
+        OrdersCompanion(status: const Value('paid'), paidAt: Value(e.occurredAt)),
+      );
+      final items = await (db.select(db.orderItems)..where((t) => t.orderId.equals(orderId))).get();
+      for (final i in items) {
+        final prod = await _product(i.productId);
+        await (db.update(db.orderItems)..where((t) => t.orderId.equals(orderId) & t.productId.equals(i.productId)))
+            .write(OrderItemsCompanion(unitCostKobo: Value(prod.avgCostKobo)));
+        await _takeStock(prod, i.qty, orderId);
+      }
+    } else {
+      orderId = await db
+          .into(db.orders)
+          .insert(
+            OrdersCompanion.insert(
+              code: await nextOrderCode(),
+              customerName: Value(e.counterparty),
+              status: 'paid',
+              expectedAmountKobo: Value(e.amountKobo),
+              deliveryFeeKobo: Value(p.deliveryFeeKobo),
+              paidAt: Value(e.occurredAt),
+            ),
+          );
+      for (final l in p.lines) {
+        final prod = await _product(l.productId);
+        await db
+            .into(db.orderItems)
+            .insert(
+              OrderItemsCompanion.insert(
+                orderId: orderId,
+                productId: l.productId,
+                qty: l.qty,
+                unitPriceKobo: prod.sellPriceKobo,
+                unitCostKobo: prod.avgCostKobo,
+              ),
+            );
+        await _takeStock(prod, l.qty, orderId);
+      }
+    }
+    await db
+        .into(db.matches)
+        .insert(
+          MatchesCompanion.insert(
+            bankEventId: e.id,
+            orderId: Value(orderId),
+            kind: manual ? 'manual' : _kindName(p.kind),
+            confidence: byUser ? 1.0 : p.confidence,
+            confirmedByUser: Value(byUser),
+          ),
+        );
+  });
 
   /// The vendor picked the products themselves.
   Future<void> confirmManual(BankEvent e, List<SaleLine> lines) =>
@@ -118,49 +130,51 @@ class Sales {
 
   Future<void> notSale(BankEvent e, {bool byUser = true}) async {
     if (await _decided(e.id)) return;
-    await db.into(db.matches).insert(MatchesCompanion.insert(
-          bankEventId: e.id,
-          kind: 'not_sale',
-          confidence: 1,
-          confirmedByUser: Value(byUser),
-        ));
+    await db
+        .into(db.matches)
+        .insert(
+          MatchesCompanion.insert(bankEventId: e.id, kind: 'not_sale', confidence: 1, confirmedByUser: Value(byUser)),
+        );
   }
 
   /// "Always ignore this sender": this event and every future one from the same name.
   Future<void> ignoreSender(BankEvent e) => db.transaction(() async {
-        final who = e.counterparty;
-        if (who != null && normalize(who).isNotEmpty) {
-          await db.into(db.ignoreRules).insert(IgnoreRulesCompanion.insert(senderKey: normalize(who)),
-              mode: InsertMode.insertOrIgnore);
-        }
-        await notSale(e);
-      });
+    final who = e.counterparty;
+    if (who != null && normalize(who).isNotEmpty) {
+      await db
+          .into(db.ignoreRules)
+          .insert(IgnoreRulesCompanion.insert(senderKey: normalize(who)), mode: InsertMode.insertOrIgnore);
+    }
+    await notSale(e);
+  });
 
   /// Puts a decided credit back in "Needs you": the vendor tapped the wrong thing.
   /// A sale Eri created is removed (stock goes back); an order set up ahead goes back to waiting.
   Future<void> undo(int bankEventId) => db.transaction(() async {
-        final m = await (db.select(db.matches)..where((t) => t.bankEventId.equals(bankEventId))).getSingleOrNull();
-        if (m == null) return;
-        await (db.delete(db.matches)..where((t) => t.id.equals(m.id))).go();
-        final orderId = m.orderId;
-        if (orderId == null) return; // was "not a sale"
+    final m = await (db.select(db.matches)..where((t) => t.bankEventId.equals(bankEventId))).getSingleOrNull();
+    if (m == null) return;
+    await (db.delete(db.matches)..where((t) => t.id.equals(m.id))).go();
+    final orderId = m.orderId;
+    if (orderId == null) return; // was "not a sale"
 
-        final items = await (db.select(db.orderItems)..where((t) => t.orderId.equals(orderId))).get();
-        for (final i in items) {
-          final p = await _product(i.productId);
-          await (db.update(db.products)..where((t) => t.id.equals(p.id)))
-              .write(ProductsCompanion(qtyOnHand: Value(p.qtyOnHand + i.qty)));
-        }
-        await (db.delete(db.stockMovements)..where((t) => t.orderId.equals(orderId) & t.reason.equals('sale'))).go();
+    final items = await (db.select(db.orderItems)..where((t) => t.orderId.equals(orderId))).get();
+    for (final i in items) {
+      final p = await _product(i.productId);
+      await (db.update(
+        db.products,
+      )..where((t) => t.id.equals(p.id))).write(ProductsCompanion(qtyOnHand: Value(p.qtyOnHand + i.qty)));
+    }
+    await (db.delete(db.stockMovements)..where((t) => t.orderId.equals(orderId) & t.reason.equals('sale'))).go();
 
-        if (m.kind == 'order_code' || m.kind == 'expected_payment') {
-          await (db.update(db.orders)..where((t) => t.id.equals(orderId)))
-              .write(const OrdersCompanion(status: Value('awaiting_payment'), paidAt: Value(null)));
-        } else {
-          await (db.delete(db.orderItems)..where((t) => t.orderId.equals(orderId))).go();
-          await (db.delete(db.orders)..where((t) => t.id.equals(orderId))).go();
-        }
-      });
+    if (m.kind == 'order_code' || m.kind == 'expected_payment') {
+      await (db.update(db.orders)..where((t) => t.id.equals(orderId))).write(
+        const OrdersCompanion(status: Value('awaiting_payment'), paidAt: Value(null)),
+      );
+    } else {
+      await (db.delete(db.orderItems)..where((t) => t.orderId.equals(orderId))).go();
+      await (db.delete(db.orders)..where((t) => t.id.equals(orderId))).go();
+    }
+  });
 
   // ── products and stock ───────────────────────────────────────────────────
 
@@ -170,39 +184,58 @@ class Sales {
     required int sellPriceKobo,
     required int costKobo,
     required int qty,
-  }) =>
-      db.transaction(() async {
-        final id = await db.into(db.products).insert(ProductsCompanion.insert(
-              name: name.trim(),
-              aliases: Value(aliases.trim()),
-              sellPriceKobo: sellPriceKobo,
-              avgCostKobo: costKobo,
-              qtyOnHand: Value(qty),
-            ));
-        if (qty > 0) {
-          await db.into(db.stockMovements).insert(StockMovementsCompanion.insert(
-              productId: id, delta: qty, reason: 'restock', unitCostKobo: Value(costKobo)));
-        }
-        return id;
-      });
+  }) => db.transaction(() async {
+    final id = await db
+        .into(db.products)
+        .insert(
+          ProductsCompanion.insert(
+            name: name.trim(),
+            aliases: Value(aliases.trim()),
+            sellPriceKobo: sellPriceKobo,
+            avgCostKobo: costKobo,
+            qtyOnHand: Value(qty),
+          ),
+        );
+    if (qty > 0) {
+      await db
+          .into(db.stockMovements)
+          .insert(
+            StockMovementsCompanion.insert(productId: id, delta: qty, reason: 'restock', unitCostKobo: Value(costKobo)),
+          );
+    }
+    return id;
+  });
 
   Future<void> updateProduct(int id, {required String name, required String aliases, required int sellPriceKobo}) =>
-      (db.update(db.products)..where((t) => t.id.equals(id))).write(ProductsCompanion(
-        name: Value(name.trim()),
-        aliases: Value(aliases.trim()),
-        sellPriceKobo: Value(sellPriceKobo),
-      ));
+      (db.update(db.products)..where((t) => t.id.equals(id))).write(
+        ProductsCompanion(
+          name: Value(name.trim()),
+          aliases: Value(aliases.trim()),
+          sellPriceKobo: Value(sellPriceKobo),
+        ),
+      );
 
   Future<void> restock(int productId, {required int qty, required int unitCostKobo}) => db.transaction(() async {
-        final p = await _product(productId);
-        await (db.update(db.products)..where((t) => t.id.equals(productId))).write(ProductsCompanion(
-          qtyOnHand: Value(p.qtyOnHand + qty),
-          avgCostKobo: Value(movingAverageCost(
-              oldQty: p.qtyOnHand, oldAvgKobo: p.avgCostKobo, addQty: qty, unitCostKobo: unitCostKobo)),
-        ));
-        await db.into(db.stockMovements).insert(StockMovementsCompanion.insert(
-            productId: productId, delta: qty, reason: 'restock', unitCostKobo: Value(unitCostKobo)));
-      });
+    final p = await _product(productId);
+    await (db.update(db.products)..where((t) => t.id.equals(productId))).write(
+      ProductsCompanion(
+        qtyOnHand: Value(p.qtyOnHand + qty),
+        avgCostKobo: Value(
+          movingAverageCost(oldQty: p.qtyOnHand, oldAvgKobo: p.avgCostKobo, addQty: qty, unitCostKobo: unitCostKobo),
+        ),
+      ),
+    );
+    await db
+        .into(db.stockMovements)
+        .insert(
+          StockMovementsCompanion.insert(
+            productId: productId,
+            delta: qty,
+            reason: 'restock',
+            unitCostKobo: Value(unitCostKobo),
+          ),
+        );
+  });
 
   // ── orders set up before payment ─────────────────────────────────────────
 
@@ -217,28 +250,38 @@ class Sales {
           prices[l.productId] = p.sellPriceKobo;
           total += p.sellPriceKobo * l.qty;
         }
-        final id = await db.into(db.orders).insert(OrdersCompanion.insert(
-              code: await nextOrderCode(),
-              customerName: Value(customer?.trim().isEmpty ?? true ? null : customer!.trim()),
-              status: 'awaiting_payment',
-              expectedAmountKobo: Value(total),
-              deliveryFeeKobo: Value(deliveryFeeKobo),
-            ));
+        final id = await db
+            .into(db.orders)
+            .insert(
+              OrdersCompanion.insert(
+                code: await nextOrderCode(),
+                customerName: Value(customer?.trim().isEmpty ?? true ? null : customer!.trim()),
+                status: 'awaiting_payment',
+                expectedAmountKobo: Value(total),
+                deliveryFeeKobo: Value(deliveryFeeKobo),
+              ),
+            );
         for (final l in lines) {
           final p = await _product(l.productId);
-          await db.into(db.orderItems).insert(OrderItemsCompanion.insert(
-                orderId: id,
-                productId: l.productId,
-                qty: l.qty,
-                unitPriceKobo: prices[l.productId]!,
-                unitCostKobo: p.avgCostKobo, // re-snapshotted when it's paid
-              ));
+          await db
+              .into(db.orderItems)
+              .insert(
+                OrderItemsCompanion.insert(
+                  orderId: id,
+                  productId: l.productId,
+                  qty: l.qty,
+                  unitPriceKobo: prices[l.productId]!,
+                  unitCostKobo: p.avgCostKobo, // re-snapshotted when it's paid
+                ),
+              );
         }
         return (db.select(db.orders)..where((t) => t.id.equals(id))).getSingle();
       });
 
-  Future<void> cancelOrder(int id) => (db.update(db.orders)..where((t) => t.id.equals(id) & t.status.equals('awaiting_payment')))
-      .write(const OrdersCompanion(status: Value('cancelled')));
+  Future<void> cancelOrder(int id) =>
+      (db.update(db.orders)..where((t) => t.id.equals(id) & t.status.equals('awaiting_payment'))).write(
+        const OrdersCompanion(status: Value('cancelled')),
+      );
 
   /// ERI-101, ERI-102, … (short enough to type into a transfer note).
   Future<String> nextOrderCode() async {
@@ -255,16 +298,18 @@ class Sales {
   Future<Product> _product(int id) => (db.select(db.products)..where((t) => t.id.equals(id))).getSingle();
 
   Future<void> _takeStock(Product p, int qty, int orderId) async {
-    await (db.update(db.products)..where((t) => t.id.equals(p.id)))
-        .write(ProductsCompanion(qtyOnHand: Value(p.qtyOnHand - qty)));
-    await db.into(db.stockMovements).insert(
-        StockMovementsCompanion.insert(productId: p.id, delta: -qty, reason: 'sale', orderId: Value(orderId)));
+    await (db.update(
+      db.products,
+    )..where((t) => t.id.equals(p.id))).write(ProductsCompanion(qtyOnHand: Value(p.qtyOnHand - qty)));
+    await db
+        .into(db.stockMovements)
+        .insert(StockMovementsCompanion.insert(productId: p.id, delta: -qty, reason: 'sale', orderId: Value(orderId)));
   }
 
   static String _kindName(MatchKind k) => switch (k) {
-        MatchKind.orderCode => 'order_code',
-        MatchKind.expectedPayment => 'expected_payment',
-        MatchKind.narration => 'narration',
-        MatchKind.amountCombo => 'amount_combo',
-      };
+    MatchKind.orderCode => 'order_code',
+    MatchKind.expectedPayment => 'expected_payment',
+    MatchKind.narration => 'narration',
+    MatchKind.amountCombo => 'amount_combo',
+  };
 }

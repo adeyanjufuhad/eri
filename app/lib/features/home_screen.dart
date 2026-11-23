@@ -8,6 +8,7 @@ import 'package:eri/features/widgets.dart';
 import 'package:eri/matching/matcher.dart';
 import 'package:eri/providers.dart';
 import 'package:eri/theme/eri_theme.dart';
+import 'package:eri/theme/motion.dart';
 
 /// Today: real money in, sales and profit from bank alerts; credits Eri wasn't sure about; the feed.
 class HomeScreen extends ConsumerWidget {
@@ -41,7 +42,8 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 const Text('Real money in today', style: TextStyle(color: EriColors.mutedForeground, fontSize: 13)),
                 const SizedBox(height: 6),
-                Text(naira(books.moneyInKobo), style: display(38)),
+                // the number counts up when money lands: the product's whole promise, in one motion
+                MoneyTicker(kobo: books.moneyInKobo, format: naira, style: display(38)),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -76,7 +78,11 @@ class HomeScreen extends ConsumerWidget {
           ],
           if (books.needsYou.isNotEmpty) ...[
             SectionLabel('Needs you (${books.needsYou.length})'),
-            for (final e in books.needsYou) ...[NeedsYouCard(e), const SizedBox(height: 10)],
+            // a credit that just landed rises in; once decided, the card leaves at once (no lingering gap)
+            for (final e in books.needsYou) ...[
+              EnterOnce(key: ValueKey('needs-${e.id}'), animate: justNow(e.occurredAt), child: NeedsYouCard(e)),
+              const SizedBox(height: 10),
+            ],
           ],
           const SectionLabel('Latest alerts'),
           if (events.isEmpty)
@@ -96,10 +102,14 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   for (final (i, e) in events.take(30).indexed) ...[
                     if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
-                    EventTile(
-                      e,
-                      label: books.labels[e.id],
-                      onReopen: books.labels[e.id] == null ? null : () => _reopen(context, ref, e),
+                    EnterOnce(
+                      key: ValueKey('event-${e.id}'),
+                      animate: justNow(e.occurredAt),
+                      child: EventTile(
+                        e,
+                        label: books.labels[e.id],
+                        onReopen: books.labels[e.id] == null ? null : () => _reopen(context, ref, e),
+                      ),
                     ),
                   ],
                 ],
@@ -196,21 +206,25 @@ class NeedsYouCard extends ConsumerWidget {
             runSpacing: 8,
             children: [
               for (final p in (out?.proposals ?? const <Proposal>[]).take(3))
-                ActionChip(
-                  label: Text(labelOf(p)),
-                  avatar: const Icon(Icons.check, size: 16),
-                  shape: const StadiumBorder(),
-                  backgroundColor: EriColors.primary.withValues(alpha: 0.08),
-                  side: BorderSide.none,
-                  onPressed: () => act(() => sales.apply(e, p, byUser: true), 'Logged: ${labelOf(p)}'),
+                PressScale(
+                  child: ActionChip(
+                    label: Text(labelOf(p)),
+                    avatar: const Icon(Icons.check, size: 16),
+                    shape: const StadiumBorder(),
+                    backgroundColor: EriColors.primary.withValues(alpha: 0.08),
+                    side: BorderSide.none,
+                    onPressed: () => act(() => sales.apply(e, p, byUser: true), 'Logged: ${labelOf(p)}'),
+                  ),
                 ),
-              ActionChip(
-                label: const Text('Pick products…'),
-                shape: const StadiumBorder(),
-                side: const BorderSide(color: EriColors.border),
-                onPressed: products.isEmpty
-                    ? () => context.go('/products')
-                    : () => showEriSheet<void>(context, (_) => _PickProducts(e, products.values.toList())),
+              PressScale(
+                child: ActionChip(
+                  label: const Text('Pick products…'),
+                  shape: const StadiumBorder(),
+                  side: const BorderSide(color: EriColors.border),
+                  onPressed: products.isEmpty
+                      ? () => context.go('/products')
+                      : () => showEriSheet<void>(context, (_) => _PickProducts(e, products.values.toList())),
+                ),
               ),
             ],
           ),
@@ -296,17 +310,20 @@ class _PickProductsState extends ConsumerState<_PickProducts> {
           ),
         ),
         const SizedBox(height: 16),
-        FilledButton(
-          onPressed: qty.values.every((q) => q == 0)
-              ? null
-              : () {
-                  ref.read(salesProvider).confirmManual(widget.e, [
-                    for (final MapEntry(:key, :value) in qty.entries)
-                      if (value > 0) SaleLine(key, value),
-                  ]);
-                  Navigator.pop(context);
-                },
-          child: const Text('Log this sale'),
+        PressScale(
+          enabled: qty.values.any((q) => q > 0),
+          child: FilledButton(
+            onPressed: qty.values.every((q) => q == 0)
+                ? null
+                : () {
+                    ref.read(salesProvider).confirmManual(widget.e, [
+                      for (final MapEntry(:key, :value) in qty.entries)
+                        if (value > 0) SaleLine(key, value),
+                    ]);
+                    Navigator.pop(context);
+                  },
+            child: const Text('Log this sale'),
+          ),
         ),
       ],
     );
@@ -338,21 +355,23 @@ class EventTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      subtitle: Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(text: '${e.bank} · ${clock(e.occurredAt)}'),
-            if (status != null)
-              TextSpan(
-                text: '\n$status',
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${e.bank} · ${clock(e.occurredAt)}', style: const TextStyle(color: EriColors.mutedForeground)),
+          // "Needs you" → "Sold: …" crossfades in place: the state change is the news
+          if (status != null)
+            Swap(
+              child: Text(
+                status,
+                key: ValueKey(status),
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: label?.sale == true ? v.landed : (label == null ? v.suspicious : EriColors.mutedForeground),
                 ),
               ),
-          ],
-        ),
-        style: const TextStyle(color: EriColors.mutedForeground),
+            ),
+        ],
       ),
       isThreeLine: status != null,
       onTap: onReopen,

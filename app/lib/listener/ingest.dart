@@ -19,7 +19,9 @@ Future<int> ingest(EriDb db, Iterable<p.RawNotification> items, {Sales? sales}) 
       final hash = rawHash(n);
       final alert = p.parseAlert(n);
       // insertReturningOrNull gives null when the hash is already stored (insert() would return the last rowid)
-      final inserted = await db.into(db.rawNotifications).insertReturningOrNull(
+      final inserted = await db
+          .into(db.rawNotifications)
+          .insertReturningOrNull(
             RawNotificationsCompanion.insert(
               package: n.package,
               title: n.title,
@@ -31,7 +33,9 @@ Future<int> ingest(EriDb db, Iterable<p.RawNotification> items, {Sales? sales}) 
             mode: InsertMode.insertOrIgnore,
           );
       if (inserted == null || alert == null) continue; // a repeat, or not a payment
-      final ev = await db.into(db.bankEvents).insertReturningOrNull(
+      final ev = await db
+          .into(db.bankEvents)
+          .insertReturningOrNull(
             BankEventsCompanion.insert(
               rawHash: hash,
               bank: alert.bank,

@@ -35,9 +35,11 @@ class BankEvents extends Table {
 class Products extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
+
   /// Other words buyers use for it, comma-separated ("gown, ankara, the blue gown").
   TextColumn get aliases => text().withDefault(const Constant(''))();
   IntColumn get sellPriceKobo => integer()();
+
   /// Moving average of what each unit cost you; updated on restock.
   IntColumn get avgCostKobo => integer()();
   IntColumn get qtyOnHand => integer().withDefault(const Constant(0))();
@@ -74,6 +76,7 @@ class OrderItems extends Table {
   IntColumn get productId => integer().references(Products, #id)();
   IntColumn get qty => integer()();
   IntColumn get unitPriceKobo => integer()();
+
   /// Snapshot of the moving-average cost when paid, so a sale's profit never changes afterwards.
   IntColumn get unitCostKobo => integer()();
 
@@ -101,50 +104,63 @@ class IgnoreRules extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-@DriftDatabase(tables: [RawNotifications, BankEvents, Products, StockMovements, Orders, OrderItems, Matches, IgnoreRules])
+@DriftDatabase(
+  tables: [RawNotifications, BankEvents, Products, StockMovements, Orders, OrderItems, Matches, IgnoreRules],
+)
 class EriDb extends _$EriDb {
   EriDb([QueryExecutor? e])
-      : super(e ??
+    : super(
+        e ??
             driftDatabase(
               name: 'eri',
               // browser preview only (the real app is Android): files from drift's 2.35.4 release, in web/
               web: DriftWebOptions(sqlite3Wasm: Uri.parse('sqlite3.wasm'), driftWorker: Uri.parse('drift_worker.js')),
-            ));
+            ),
+      );
 
   @override
   int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            // Day 2: products, orders, matching
-            for (final TableInfo<Table, dynamic> t in [products, stockMovements, orders, orderItems, matches, ignoreRules]) {
-              await m.createTable(t);
-            }
-          }
-        },
-        beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
-      );
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // Day 2: products, orders, matching
+        for (final TableInfo<Table, dynamic> t in [
+          products,
+          stockMovements,
+          orders,
+          orderItems,
+          matches,
+          ignoreRules,
+        ]) {
+          await m.createTable(t);
+        }
+      }
+    },
+    beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
+  );
 
-  Stream<List<BankEvent>> watchEvents({int limit = 100}) => (select(bankEvents)
-        ..orderBy([(t) => OrderingTerm.desc(t.occurredAt)])
-        ..limit(limit))
-      .watch();
+  Stream<List<BankEvent>> watchEvents({int limit = 100}) =>
+      (select(bankEvents)
+            ..orderBy([(t) => OrderingTerm.desc(t.occurredAt)])
+            ..limit(limit))
+          .watch();
 
-  Stream<List<RawNotification>> watchRaw({int limit = 100}) => (select(rawNotifications)
-        ..orderBy([(t) => OrderingTerm.desc(t.postedAt)])
-        ..limit(limit))
-      .watch();
+  Stream<List<RawNotification>> watchRaw({int limit = 100}) =>
+      (select(rawNotifications)
+            ..orderBy([(t) => OrderingTerm.desc(t.postedAt)])
+            ..limit(limit))
+          .watch();
 
-  Stream<List<Product>> watchProducts() => (select(products)
-        ..where((t) => t.active.equals(true))
-        ..orderBy([(t) => OrderingTerm.asc(t.name)]))
-      .watch();
+  Stream<List<Product>> watchProducts() =>
+      (select(products)
+            ..where((t) => t.active.equals(true))
+            ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+          .watch();
 
-  Stream<List<Order>> watchOrders() =>
-      (select(orders)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
+  Stream<List<Order>> watchOrders() => (select(orders)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
 
   Stream<List<SaleMatch>> watchMatches() => select(matches).watch();
 

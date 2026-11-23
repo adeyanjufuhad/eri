@@ -27,7 +27,11 @@ abstract final class EriRadius {
 
 /// Verdict colours as a ThemeExtension, so widgets ask the theme instead of hard-coding them.
 class EriVerdicts extends ThemeExtension<EriVerdicts> {
-  const EriVerdicts({this.landed = EriColors.landed, this.notReceived = EriColors.notReceived, this.suspicious = EriColors.suspicious});
+  const EriVerdicts({
+    this.landed = EriColors.landed,
+    this.notReceived = EriColors.notReceived,
+    this.suspicious = EriColors.suspicious,
+  });
 
   final Color landed;
   final Color notReceived;
@@ -35,7 +39,10 @@ class EriVerdicts extends ThemeExtension<EriVerdicts> {
 
   @override
   EriVerdicts copyWith({Color? landed, Color? notReceived, Color? suspicious}) => EriVerdicts(
-      landed: landed ?? this.landed, notReceived: notReceived ?? this.notReceived, suspicious: suspicious ?? this.suspicious);
+    landed: landed ?? this.landed,
+    notReceived: notReceived ?? this.notReceived,
+    suspicious: suspicious ?? this.suspicious,
+  );
 
   @override
   EriVerdicts lerp(EriVerdicts? other, double t) => other == null
@@ -53,8 +60,13 @@ bool eriGoogleFonts = true;
 /// Lexend 600 for display, Inter for body; numbers use tabular figures so ticking amounts don't jitter.
 TextStyle display(double size, {Color color = EriColors.foreground}) {
   final style = TextStyle(
-      fontSize: size, fontWeight: FontWeight.w600, letterSpacing: -0.03 * size, height: 1.05, color: color,
-      fontFeatures: const [FontFeature.tabularFigures()]);
+    fontSize: size,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.03 * size,
+    height: 1.05,
+    color: color,
+    fontFeatures: const [FontFeature.tabularFigures()],
+  );
   return eriGoogleFonts ? GoogleFonts.lexend(textStyle: style) : style;
 }
 
@@ -83,6 +95,8 @@ ThemeData eriTheme() {
     scaffoldBackgroundColor: EriColors.background,
     textTheme: text,
     dividerColor: EriColors.border,
+    // a plain ripple: Android's sparkle is decoration on something pressed all day
+    splashFactory: InkRipple.splashFactory,
     cardTheme: CardThemeData(
       color: EriColors.card,
       elevation: 0,

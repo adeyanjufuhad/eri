@@ -14,8 +14,11 @@ class DebugFeedScreen extends ConsumerWidget {
 
   // lets the flow be shown without bank apps (emulator, browser preview). Synthetic text.
   static final _samples = [
-    ('com.google.android.apps.messaging', 'GTBank',
-        'GTBank: Acct 01******89 Cr NGN25,000.00 from CHIOMA OKAFOR Desc: ankara gown Avail Bal: NGN412,300.00'),
+    (
+      'com.google.android.apps.messaging',
+      'GTBank',
+      'GTBank: Acct 01******89 Cr NGN25,000.00 from CHIOMA OKAFOR Desc: ankara gown Avail Bal: NGN412,300.00',
+    ),
     ('team.opay.pay', 'Transfer received', 'You have received ₦8,500.00 from FEMI ADEYEMI.'),
     ('com.kudabank.app', 'Money out', 'You sent ₦4,150.00 to GIG LOGISTICS.'),
   ];
@@ -24,27 +27,38 @@ class DebugFeedScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final raw = ref.watch(rawProvider).value ?? const [];
     return Scaffold(
-      appBar: AppBar(title: const Text('Alert log'), actions: [
-        if (kDebugMode || kIsWeb)
-          TextButton.icon(
-            onPressed: () async {
-              // demo catalogue for trying the loop without typing (same products as the landing page)
-              final sales = ref.read(salesProvider);
-              final have = (await ref.read(dbProvider).select(ref.read(dbProvider).products).get()).map((p) => p.name).toSet();
-              for (final (name, aliases, price, cost, qty) in const [
-                ('Ankara Gown', 'gown, ankara', 2500000, 1750000, 4),
-                ('Adire Two-piece', 'adire set, adire', 1800000, 1200000, 6),
-                ('Aso-oke Cap', 'cap, aso oke', 850000, 500000, 9),
-              ]) {
-                if (!have.contains(name)) {
-                  await sales.addProduct(name: name, aliases: aliases, sellPriceKobo: price, costKobo: cost, qty: qty);
+      appBar: AppBar(
+        title: const Text('Alert log'),
+        actions: [
+          if (kDebugMode || kIsWeb)
+            TextButton.icon(
+              onPressed: () async {
+                // demo catalogue for trying the loop without typing (same products as the landing page)
+                final sales = ref.read(salesProvider);
+                final have = (await ref.read(dbProvider).select(ref.read(dbProvider).products).get())
+                    .map((p) => p.name)
+                    .toSet();
+                for (final (name, aliases, price, cost, qty) in const [
+                  ('Ankara Gown', 'gown, ankara', 2500000, 1750000, 4),
+                  ('Adire Two-piece', 'adire set, adire', 1800000, 1200000, 6),
+                  ('Aso-oke Cap', 'cap, aso oke', 850000, 500000, 9),
+                ]) {
+                  if (!have.contains(name)) {
+                    await sales.addProduct(
+                      name: name,
+                      aliases: aliases,
+                      sellPriceKobo: price,
+                      costKobo: cost,
+                      qty: qty,
+                    );
+                  }
                 }
-              }
-            },
-            icon: const Icon(Icons.storefront_outlined),
-            label: const Text('Demo shop'),
-          ),
-      ]),
+              },
+              icon: const Icon(Icons.storefront_outlined),
+              label: const Text('Demo shop'),
+            ),
+        ],
+      ),
       // debug builds and the browser preview (which has no listener) only; never in the release APK
       floatingActionButton: kDebugMode || kIsWeb
           ? FloatingActionButton.extended(
@@ -63,7 +77,10 @@ class DebugFeedScreen extends ConsumerWidget {
         children: [
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 0, 4, 12),
-            child: Text('On this phone only. Deleted after 7 days.', style: TextStyle(color: EriColors.mutedForeground)),
+            child: Text(
+              'On this phone only. Deleted after 7 days.',
+              style: TextStyle(color: EriColors.mutedForeground),
+            ),
           ),
           if (raw.isEmpty)
             const Padding(
@@ -96,21 +113,28 @@ class _RawCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Expanded(
-              child: Text('$package · ${clock(postedAt)}',
-                  style: const TextStyle(fontSize: 12, color: EriColors.mutedForeground), overflow: TextOverflow.ellipsis),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-              decoration: BoxDecoration(
-                color: (parsed ? v.landed : v.suspicious).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(EriRadius.pill),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '$package · ${clock(postedAt)}',
+                  style: const TextStyle(fontSize: 12, color: EriColors.mutedForeground),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              child: Text(parsed ? 'Parsed' : 'Not a payment',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: parsed ? v.landed : v.suspicious)),
-            ),
-          ]),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: (parsed ? v.landed : v.suspicious).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(EriRadius.pill),
+                ),
+                child: Text(
+                  parsed ? 'Parsed' : 'Not a payment',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: parsed ? v.landed : v.suspicious),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           if (title.isNotEmpty) Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
           Text(body, style: const TextStyle(fontFamily: 'monospace', fontSize: 12, height: 1.4)),

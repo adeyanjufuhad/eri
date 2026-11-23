@@ -81,6 +81,8 @@ Shadows: `shadow-soft` (resting cards) and `shadow-lift` (a card that pops forwa
 - Respect `prefers-reduced-motion`: pinned sections become static step cards.
 - Every animation must explain the product. Decoration-only motion gets removed (`remove-animations` skill).
 
+**Flutter motion (23 Nov, Emil Kowalski skills):** tokens in `app/lib/theme/motion.dart` reuse the web curves (`EriCurves.out` 0.23,1,0.32,1 · `inOut` 0.77,0,0.175,1 · `drawer` 0.32,0.72,0,1). What moves: press feedback (0.97, 120ms) on buttons, chips and product cards; a just-landed alert or "Needs you" card fades and rises 8px (240ms ease-out); the money-in-today number counts up (450ms); "Needs you" → "Sold" and stock counts crossfade in place (180ms); sheets open on the drawer curve (320ms in, 200ms out); the first-run welcome staggers in (60ms apart). What doesn't: tab switches, +/- steppers, typing, anything opened dozens of times a day. Reduced motion (`MediaQuery.disableAnimations`) keeps fades and drops movement. A decided card leaves at once, no gap.
+
 **Flutter app** is light-themed: `ThemeData(brightness: Brightness.light)` built from the light tokens, `ThemeExtension` for verdict colours, the same radius scale (16px cards, pill buttons), Lexend 600 + Inter via `google_fonts`. Background `#e5eaf2`, cards `#ffffff`, text `#0f141d`, accent `#3b5bff`.
 
 ## Stack (web)

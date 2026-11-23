@@ -76,8 +76,11 @@ final booksProvider = Provider<Books>((ref) {
   for (final i in items) {
     (itemsByOrder[i.orderId] ??= []).add(i);
   }
-  int profitOf(int orderId) => grossProfit((itemsByOrder[orderId] ?? const [])
-      .map((i) => (qty: i.qty, unitPriceKobo: i.unitPriceKobo, unitCostKobo: i.unitCostKobo)));
+  int profitOf(int orderId) => grossProfit(
+    (itemsByOrder[orderId] ?? const []).map(
+      (i) => (qty: i.qty, unitPriceKobo: i.unitPriceKobo, unitCostKobo: i.unitCostKobo),
+    ),
+  );
 
   final matchByEvent = {for (final m in matches) m.bankEventId: m};
   final labels = <int, EventLabel>{};
@@ -90,7 +93,9 @@ final booksProvider = Provider<Books>((ref) {
     }
     final lines = itemsByOrder[m.orderId] ?? const [];
     final names = lines.map((i) => '${byId[i.productId]?.name ?? 'Item'}${i.qty > 1 ? ' ×${i.qty}' : ''}').join(', ');
-    final left = lines.length == 1 && byId[lines.first.productId] != null ? ' · ${byId[lines.first.productId]!.qtyOnHand} left' : '';
+    final left = lines.length == 1 && byId[lines.first.productId] != null
+        ? ' · ${byId[lines.first.productId]!.qtyOnHand} left'
+        : '';
     labels[e.id] = EventLabel('Sold: $names · +${naira(profitOf(m.orderId!))}$left', sale: true);
   }
 
@@ -108,6 +113,9 @@ final booksProvider = Provider<Books>((ref) {
         if (e.direction == 'credit' && !matchByEvent.containsKey(e.id) && e.occurredAt.isAfter(weekAgo)) e,
     ],
     labels: labels,
-    lowStock: [for (final p in products) if (p.qtyOnHand <= p.lowStockThreshold) p],
+    lowStock: [
+      for (final p in products)
+        if (p.qtyOnHand <= p.lowStockThreshold) p,
+    ],
   );
 });

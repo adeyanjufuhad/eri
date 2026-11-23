@@ -10,7 +10,13 @@ import 'package:eri/matching/text_match.dart';
 // It only acts on its own when the best proposal is clearly ahead (see [MatchOutcome.auto]).
 
 class MProduct {
-  const MProduct({required this.id, required this.name, this.aliases = const [], required this.priceKobo, this.qty = 0});
+  const MProduct({
+    required this.id,
+    required this.name,
+    this.aliases = const [],
+    required this.priceKobo,
+    this.qty = 0,
+  });
   final int id;
   final String name;
   final List<String> aliases;
@@ -19,7 +25,13 @@ class MProduct {
 }
 
 class MOrder {
-  const MOrder({required this.id, required this.code, required this.expectedKobo, this.customer, this.lines = const []});
+  const MOrder({
+    required this.id,
+    required this.code,
+    required this.expectedKobo,
+    this.customer,
+    this.lines = const [],
+  });
   final int id;
   final String code; // 'ERI-104'
   final int expectedKobo; // items + delivery fee
@@ -48,7 +60,13 @@ class SaleLine {
 enum MatchKind { orderCode, expectedPayment, narration, amountCombo }
 
 class Proposal {
-  const Proposal({required this.kind, required this.confidence, required this.lines, this.orderId, this.deliveryFeeKobo = 0});
+  const Proposal({
+    required this.kind,
+    required this.confidence,
+    required this.lines,
+    this.orderId,
+    this.deliveryFeeKobo = 0,
+  });
   final MatchKind kind;
   final double confidence;
   final List<SaleLine> lines;
@@ -56,7 +74,8 @@ class Proposal {
   final int deliveryFeeKobo;
 
   @override
-  String toString() => 'Proposal(${kind.name} ${confidence.toStringAsFixed(2)} order=$orderId lines=${lines.map((l) => '${l.productId}x${l.qty}').join(',')})';
+  String toString() =>
+      'Proposal(${kind.name} ${confidence.toStringAsFixed(2)} order=$orderId lines=${lines.map((l) => '${l.productId}x${l.qty}').join(',')})';
 }
 
 class MatchOutcome {
@@ -100,8 +119,14 @@ MatchOutcome matchCredit(
     final wanted = 'ERI-${code.group(1)}';
     for (final o in openOrders.where((o) => o.code.toUpperCase() == wanted)) {
       // paid in full → certain; short → the vendor decides (part payment)
-      out.add(Proposal(
-          kind: MatchKind.orderCode, confidence: e.amountKobo >= o.expectedKobo ? 1.0 : 0.5, lines: o.lines, orderId: o.id));
+      out.add(
+        Proposal(
+          kind: MatchKind.orderCode,
+          confidence: e.amountKobo >= o.expectedKobo ? 1.0 : 0.5,
+          lines: o.lines,
+          orderId: o.id,
+        ),
+      );
     }
   }
 
@@ -138,12 +163,14 @@ MatchOutcome matchCredit(
       }
       final total = p.priceKobo * qty;
       final fits = e.amountKobo == total || (deliveryFeeKobo > 0 && e.amountKobo == total + deliveryFeeKobo);
-      out.add(Proposal(
-        kind: MatchKind.narration,
-        confidence: fits ? 0.5 + 0.5 * best : 0.5 * best,
-        lines: [SaleLine(p.id, qty)],
-        deliveryFeeKobo: fits && e.amountKobo != total ? deliveryFeeKobo : 0,
-      ));
+      out.add(
+        Proposal(
+          kind: MatchKind.narration,
+          confidence: fits ? 0.5 + 0.5 * best : 0.5 * best,
+          lines: [SaleLine(p.id, qty)],
+          deliveryFeeKobo: fits && e.amountKobo != total ? deliveryFeeKobo : 0,
+        ),
+      );
     }
   }
 
@@ -151,19 +178,23 @@ MatchOutcome matchCredit(
   if (out.every((p) => p.confidence < MatchOutcome.autoThreshold)) {
     final combos = _amountCombos(e.amountKobo, products, deliveryFeeKobo);
     // prefer what is actually in stock
-    final inStock = combos.where((c) => c.$1.every((l) => products.firstWhere((p) => p.id == l.productId).qty >= l.qty)).toList();
+    final inStock = combos
+        .where((c) => c.$1.every((l) => products.firstWhere((p) => p.id == l.productId).qty >= l.qty))
+        .toList();
     final pick = inStock.isNotEmpty ? inStock : combos;
     for (final (lines, fee) in pick) {
       // Only "exactly one unit of exactly one product" is safe to book on the amount alone. Quantities and
       // combinations guessed from an amount (₦50,000 = 2 gowns?) are offered as a one-tap suggestion instead:
       // a transfer from your own savings account must never turn into a sale.
       final single = lines.length == 1 && lines.first.qty == 1 && fee == 0;
-      out.add(Proposal(
-        kind: MatchKind.amountCombo,
-        confidence: pick.length == 1 ? (single ? 0.7 : 0.55) : 0.4,
-        lines: lines,
-        deliveryFeeKobo: fee,
-      ));
+      out.add(
+        Proposal(
+          kind: MatchKind.amountCombo,
+          confidence: pick.length == 1 ? (single ? 0.7 : 0.55) : 0.4,
+          lines: lines,
+          deliveryFeeKobo: fee,
+        ),
+      );
     }
   }
 
