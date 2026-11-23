@@ -31,7 +31,9 @@ final orderItemsProvider = StreamProvider<List<OrderItem>>((ref) => ref.watch(db
 final suggestionsProvider = FutureProvider.family<MatchOutcome, int>((ref, eventId) async {
   ref.watch(productsProvider); // re-suggest when the catalogue changes
   ref.watch(ordersProvider);
-  final e = (ref.read(eventsProvider).value ?? const []).where((e) => e.id == eventId).firstOrNull;
+  // straight from the database: the events stream may not have delivered yet on a cold start
+  final db = ref.watch(dbProvider);
+  final e = await (db.select(db.bankEvents)..where((t) => t.id.equals(eventId))).getSingleOrNull();
   if (e == null) return const MatchOutcome();
   return ref.read(salesProvider).outcomeFor(e);
 });
