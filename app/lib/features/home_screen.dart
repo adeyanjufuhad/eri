@@ -9,6 +9,7 @@ import 'package:eri/features/widgets.dart';
 import 'package:eri/matching/matcher.dart';
 import 'package:eri/providers.dart';
 import 'package:eri/theme/eri_theme.dart';
+import 'package:eri/theme/bits.dart';
 import 'package:eri/theme/motion.dart';
 
 /// Today: real money in, sales and profit from bank alerts; credits Eri wasn't sure about; the feed.
@@ -59,102 +60,126 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             if (!granted) ...[_PermissionBanner(onTap: () => context.go('/welcome')), const SizedBox(height: 12)],
-            // hero: the one number that matters, on Eri's blue (Round 4, A1)
-            Container(
-              padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(EriRadius.xl - 4),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [EriColors.primary, Color(0xFF5B6FFF), Color(0xFF8E9BFF)],
+            // hero: the one number that matters, on Eri's blue (Round 4, A1). The glow follows a finger on it
+            // (React Bits Spotlight Card).
+            Spotlight(
+              color: Colors.white.withValues(alpha: 0.22),
+              radius: EriRadius.xl - 4,
+              size: 260,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(EriRadius.xl - 4),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [EriColors.primary, Color(0xFF5B6FFF), Color(0xFF8E9BFF)],
+                  ),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x553B5BFF), blurRadius: 36, offset: Offset(0, 18), spreadRadius: -14),
+                  ],
                 ),
-                boxShadow: const [
-                  BoxShadow(color: Color(0x553B5BFF), blurRadius: 36, offset: Offset(0, 18), spreadRadius: -14),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'Real money in today',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Color(0xDDFFFFFF), fontSize: 13),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Real money in today',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Color(0xDDFFFFFF), fontSize: 13),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(EriRadius.pill),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(EriRadius.pill),
+                          ),
+                          child: const Text(
+                            'From bank alerts',
+                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                          ),
                         ),
-                        child: const Text(
-                          'From bank alerts',
-                          style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // each digit rolls to its new value when money lands (React Bits Counter): the product's
+                    // whole promise, in one motion
+                    RollingMoney(
+                      kobo: books.moneyInKobo,
+                      format: naira,
+                      style: display(42, color: Colors.white),
+                    ),
+                    const SizedBox(height: 14),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _HeroPill('${books.salesCount} ${books.salesCount == 1 ? 'sale' : 'sales'}'),
+                        _HeroPill('Profit ${naira(books.profitKobo)}'),
+                        _HeroPill('Spent ${naira(books.spentKobo)}'),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Container(height: 1, color: Colors.white.withValues(alpha: 0.18)),
+                    const SizedBox(height: 12),
+                    // net = profit on what sold − business expenses (debits), so the vendor sees the real day
+                    Row(
+                      children: [
+                        const Text('Net today', style: TextStyle(color: Color(0xDDFFFFFF))),
+                        const Spacer(),
+                        Text(
+                          naira(books.netKobo),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            fontFeatures: tabular,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // the number counts up when money lands: the product's whole promise, in one motion
-                  MoneyTicker(
-                    kobo: books.moneyInKobo,
-                    format: naira,
-                    style: display(42, color: Colors.white),
-                  ),
-                  const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _HeroPill('${books.salesCount} ${books.salesCount == 1 ? 'sale' : 'sales'}'),
-                      _HeroPill('Profit ${naira(books.profitKobo)}'),
-                      _HeroPill('Spent ${naira(books.spentKobo)}'),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Container(height: 1, color: Colors.white.withValues(alpha: 0.18)),
-                  const SizedBox(height: 12),
-                  // net = profit on what sold − business expenses (debits), so the vendor sees the real day
-                  Row(
-                    children: [
-                      const Text('Net today', style: TextStyle(color: Color(0xDDFFFFFF))),
-                      const Spacer(),
-                      Text(
-                        naira(books.netKobo),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          fontFeatures: tabular,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 18),
             // quick actions, the way banking apps put Send / Receive under the balance (Round 4, A3)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _QuickAction(
-                  icon: Icons.fact_check_outlined,
-                  label: 'Check receipt',
-                  onTap: () => context.push('/receipt'),
-                ),
-                _QuickAction(
-                  icon: Icons.add_shopping_cart_rounded,
-                  label: 'New order',
-                  onTap: () => context.go('/orders'),
-                ),
-                _QuickAction(icon: Icons.inventory_2_outlined, label: 'Products', onTap: () => context.go('/products')),
-              ],
+            // they scale in 40ms apart the first time Today opens this session (React Bits Animated List)
+            RevealScope(
+              id: 'today-actions',
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  RevealItem(
+                    index: 0,
+                    child: _QuickAction(
+                      icon: Icons.fact_check_outlined,
+                      label: 'Check receipt',
+                      onTap: () => context.push('/receipt'),
+                    ),
+                  ),
+                  RevealItem(
+                    index: 1,
+                    child: _QuickAction(
+                      icon: Icons.add_shopping_cart_rounded,
+                      label: 'New order',
+                      onTap: () => context.go('/orders'),
+                    ),
+                  ),
+                  RevealItem(
+                    index: 2,
+                    child: _QuickAction(
+                      icon: Icons.inventory_2_outlined,
+                      label: 'Products',
+                      onTap: () => context.go('/products'),
+                    ),
+                  ),
+                ],
+              ),
             ),
             if (books.lowStock.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -178,7 +203,7 @@ class HomeScreen extends ConsumerWidget {
                 EnterOnce(
                   key: ValueKey('claim-${c.id}-${c.status}'),
                   animate: justNow(c.claimedAt) || c.status != 'pending',
-                  child: ClaimCard(c),
+                  child: Spotlight(child: ClaimCard(c)),
                 ),
                 const SizedBox(height: 10),
               ],
@@ -187,7 +212,11 @@ class HomeScreen extends ConsumerWidget {
               SectionLabel('Needs you (${books.needsYou.length})'),
               // a credit that just landed rises in; once decided, the card leaves at once (no lingering gap)
               for (final e in books.needsYou) ...[
-                EnterOnce(key: ValueKey('needs-${e.id}'), animate: justNow(e.occurredAt), child: NeedsYouCard(e)),
+                EnterOnce(
+                  key: ValueKey('needs-${e.id}'),
+                  animate: justNow(e.occurredAt),
+                  child: Spotlight(child: NeedsYouCard(e)),
+                ),
                 const SizedBox(height: 10),
               ],
             ],

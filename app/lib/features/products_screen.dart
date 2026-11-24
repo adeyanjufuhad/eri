@@ -5,6 +5,7 @@ import 'package:eri/data/db.dart';
 import 'package:eri/features/widgets.dart';
 import 'package:eri/providers.dart';
 import 'package:eri/theme/eri_theme.dart';
+import 'package:eri/theme/bits.dart';
 import 'package:eri/theme/motion.dart';
 
 /// What the vendor sells: price, what it cost (moving average), how many are left.
@@ -35,66 +36,76 @@ class ProductsScreen extends ConsumerWidget {
                 ),
               ),
             )
-          : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
-              itemCount: products.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (_, i) {
-                final p = products[i];
-                final low = p.qtyOnHand <= p.lowStockThreshold;
-                return PressScale(
-                  child: Material(
-                    color: EriColors.card,
-                    borderRadius: BorderRadius.circular(EriRadius.lg),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(EriRadius.lg),
-                      onTap: () => showEriSheet<void>(context, (_) => ProductForm(product: p)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 22,
-                              backgroundColor: EriColors.primary.withValues(alpha: 0.1),
-                              child: Text(
-                                p.name.isEmpty ? '?' : p.name[0].toUpperCase(),
-                                style: const TextStyle(color: EriColors.primary, fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+          : RevealScope(
+              id: 'products',
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+                itemCount: products.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
+                itemBuilder: (_, i) {
+                  final p = products[i];
+                  final low = p.qtyOnHand <= p.lowStockThreshold;
+                  return RevealItem(
+                    index: i,
+                    child: Spotlight(
+                      child: PressScale(
+                        child: Material(
+                          color: EriColors.card,
+                          borderRadius: BorderRadius.circular(EriRadius.lg),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(EriRadius.lg),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () => showEriSheet<void>(context, (_) => ProductForm(product: p)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
                                 children: [
-                                  Text(p.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Sells ${naira(p.sellPriceKobo)} · costs ${naira(p.avgCostKobo)}${p.aliases.isEmpty ? '' : '\nAlso: ${p.aliases}'}',
-                                    style: const TextStyle(
-                                      color: EriColors.mutedForeground,
-                                      fontSize: 13,
-                                      height: 1.35,
+                                  CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: EriColors.primary.withValues(alpha: 0.1),
+                                    child: Text(
+                                      p.name.isEmpty ? '?' : p.name[0].toUpperCase(),
+                                      style: const TextStyle(color: EriColors.primary, fontWeight: FontWeight.w700),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(p.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Sells ${naira(p.sellPriceKobo)} · costs ${naira(p.avgCostKobo)}${p.aliases.isEmpty ? '' : '\nAlso: ${p.aliases}'}',
+                                          style: const TextStyle(
+                                            color: EriColors.mutedForeground,
+                                            fontSize: 13,
+                                            height: 1.35,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // the count crossfades when a sale takes one: that change is the news
+                                  Swap(
+                                    child: Pill(
+                                      key: ValueKey(p.qtyOnHand),
+                                      '${p.qtyOnHand} left',
+                                      color: low ? v.suspicious.withValues(alpha: 0.12) : null,
+                                      textColor: low ? v.suspicious : null,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            // the count crossfades when a sale takes one: that change is the news
-                            Swap(
-                              child: Pill(
-                                key: ValueKey(p.qtyOnHand),
-                                '${p.qtyOnHand} left',
-                                color: low ? v.suspicious.withValues(alpha: 0.12) : null,
-                                textColor: low ? v.suspicious : null,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
     );
   }

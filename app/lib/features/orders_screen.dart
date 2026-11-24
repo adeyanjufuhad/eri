@@ -7,6 +7,7 @@ import 'package:eri/features/widgets.dart';
 import 'package:eri/matching/matcher.dart';
 import 'package:eri/providers.dart';
 import 'package:eri/theme/eri_theme.dart';
+import 'package:eri/theme/bits.dart';
 import 'package:eri/theme/motion.dart';
 
 /// Orders: the ones waiting for money (with the code to put in the transfer note), and the paid ones.
@@ -22,7 +23,7 @@ class OrdersScreen extends ConsumerWidget {
     final waiting = orders.where((o) => o.status == 'awaiting_payment').toList();
     final rest = orders.where((o) => o.status != 'awaiting_payment').toList();
 
-    Widget tile(Order o) {
+    Widget card(Order o) {
       final lines = items
           .where((i) => i.orderId == o.id)
           .map((i) => '${products[i.productId]?.name ?? 'Item'}${i.qty > 1 ? ' ×${i.qty}' : ''}')
@@ -64,6 +65,9 @@ class OrdersScreen extends ConsumerWidget {
       );
     }
 
+    var n = 0; // stagger order across both sections
+    Widget tile(Order o) => RevealItem(index: n++, child: card(o));
+
     return Scaffold(
       appBar: AppBar(title: const Text('Orders')),
       floatingActionButton: PressScale(
@@ -74,24 +78,27 @@ class OrdersScreen extends ConsumerWidget {
           label: const Text('New order'),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
-        children: [
-          if (orders.isEmpty)
-            EriCard(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                products.isEmpty
-                    ? 'Add a product first. Sales from bank alerts show up here on their own.'
-                    : 'Sales from bank alerts show up here on their own. Set up an order when a buyer is about to pay: Eri gives you a code like ERI-101 for their transfer note.',
-                style: const TextStyle(color: EriColors.mutedForeground, height: 1.4),
+      body: RevealScope(
+        id: 'orders',
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+          children: [
+            if (orders.isEmpty)
+              EriCard(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  products.isEmpty
+                      ? 'Add a product first. Sales from bank alerts show up here on their own.'
+                      : 'Sales from bank alerts show up here on their own. Set up an order when a buyer is about to pay: Eri gives you a code like ERI-101 for their transfer note.',
+                  style: const TextStyle(color: EriColors.mutedForeground, height: 1.4),
+                ),
               ),
-            ),
-          if (waiting.isNotEmpty) const SectionLabel('Waiting for money'),
-          for (final o in waiting) ...[tile(o), const SizedBox(height: 10)],
-          if (rest.isNotEmpty) const SectionLabel('Done'),
-          for (final o in rest.take(50)) ...[tile(o), const SizedBox(height: 10)],
-        ],
+            if (waiting.isNotEmpty) const SectionLabel('Waiting for money'),
+            for (final o in waiting) ...[tile(o), const SizedBox(height: 10)],
+            if (rest.isNotEmpty) const SectionLabel('Done'),
+            for (final o in rest.take(50)) ...[tile(o), const SizedBox(height: 10)],
+          ],
+        ),
       ),
     );
   }
