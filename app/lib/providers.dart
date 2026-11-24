@@ -3,6 +3,7 @@ import 'package:eri/core/money.dart';
 import 'package:eri/core/time.dart';
 import 'package:eri/data/db.dart';
 import 'package:eri/listener/notification_bridge.dart';
+import 'package:eri/canary/canary.dart';
 import 'package:eri/claims/claim_service.dart';
 import 'package:eri/matching/costing.dart';
 import 'package:eri/matching/expenses.dart';
@@ -24,6 +25,26 @@ final receiptsProvider = Provider<Receipts>((ref) => Receipts(ref.watch(dbProvid
 
 final expensesProvider = StreamProvider<List<Expense>>((ref) => ref.watch(dbProvider).watchExpenses());
 final claimListProvider = StreamProvider<List<PaymentClaim>>((ref) => ref.watch(dbProvider).watchClaims());
+
+/// Canary client with this install's random id (created once, kept on the phone).
+final canaryProvider = FutureProvider<CanaryClient>((ref) async {
+  final db = ref.watch(dbProvider);
+  var id = await db.setting('install_id');
+  if (id == null) {
+    id = newInstallId();
+    await db.setSetting('install_id', id);
+  }
+  return CanaryClient(installId: id);
+});
+
+/// Scam warnings from other Eri vendors (sends a hash to check). On unless the vendor turns it off.
+final canaryOnProvider = FutureProvider<bool>((ref) async => await ref.watch(dbProvider).setting('canary') != 'off');
+
+/// "Flagged by N Eri vendors": by sender name and/or receipt image hash. 0 when off or offline.
+final canaryFlagsProvider = FutureProvider.family<int, ({String? sender, String? imageHash})>((ref, q) async {
+  if (!await ref.watch(canaryOnProvider.future)) return 0;
+  return (await ref.watch(canaryProvider.future)).flags(sender: q.sender, imageHash: q.imageHash);
+});
 
 /// Opt-in "I've paid" checks (stored natively so the listener can read it).
 final chatChecksProvider = FutureProvider<bool>((ref) => ref.watch(bridgeProvider).chatChecks());

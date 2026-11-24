@@ -141,6 +141,15 @@ class ReceiptChecks extends Table {
   DateTimeColumn get checkedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+/// Small app settings: the random install id for scam reports, the scam-warnings switch.
+class AppSettings extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {key};
+}
+
 @DriftDatabase(
   tables: [
     RawNotifications,
@@ -154,6 +163,7 @@ class ReceiptChecks extends Table {
     Expenses,
     PaymentClaims,
     ReceiptChecks,
+    AppSettings,
   ],
 )
 class EriDb extends _$EriDb {
@@ -168,7 +178,7 @@ class EriDb extends _$EriDb {
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -193,6 +203,7 @@ class EriDb extends _$EriDb {
           await m.createTable(t);
         }
       }
+      if (from < 4) await m.createTable(appSettings); // Canary: install id, scam-warnings switch
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -220,6 +231,12 @@ class EriDb extends _$EriDb {
   Stream<List<SaleMatch>> watchMatches() => select(matches).watch();
 
   Stream<List<OrderItem>> watchOrderItems() => select(orderItems).watch();
+
+  Future<String?> setting(String key) async =>
+      (await (select(appSettings)..where((t) => t.key.equals(key))).getSingleOrNull())?.value;
+
+  Future<void> setSetting(String key, String value) =>
+      into(appSettings).insertOnConflictUpdate(AppSettingsCompanion.insert(key: key, value: value));
 
   Stream<List<Expense>> watchExpenses() => select(expenses).watch();
 

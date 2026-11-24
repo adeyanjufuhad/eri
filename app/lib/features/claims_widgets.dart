@@ -80,11 +80,13 @@ class ClaimCard extends ConsumerWidget {
               ),
             ),
           ],
+          CanaryNote(sender: c.sender),
           if (c.status != 'pending')
-            Row(
+            Wrap(
               children: [
                 TextButton(onPressed: () => claims.markPaid(c.id), child: const Text('It arrived')),
                 TextButton(onPressed: () => claims.dismiss(c.id), child: const Text('Dismiss')),
+                if (c.status == 'not_received') WarnVendorsButton(sender: c.sender),
               ],
             ),
         ],
@@ -100,6 +102,7 @@ class SettingsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final on = ref.watch(chatChecksProvider).value ?? false;
+    final canaryOn = ref.watch(canaryOnProvider).value ?? true;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -136,6 +139,31 @@ class SettingsSheet extends ConsumerWidget {
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   ),
                 ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        EriCard(
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: canaryOn,
+                onChanged: (v) async {
+                  await ref.read(dbProvider).setSetting('canary', v ? 'on' : 'off');
+                  ref.invalidate(canaryOnProvider);
+                },
+                title: const Text('Scam warnings from other vendors', style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: const Text('Canary network'),
+              ),
+              const Text(
+                'Eri checks a one-way fingerprint of a sender’s name or a receipt against fakes other Eri vendors '
+                'caught. Only the fingerprint is sent: never names, numbers, pictures or messages. You choose when '
+                'to warn others.',
+                style: TextStyle(color: EriColors.mutedForeground, height: 1.4, fontSize: 13),
+              ),
             ],
           ),
         ),
@@ -177,5 +205,55 @@ class ExpenseSheet extends ConsumerWidget {
         ],
       ),
     ],
+  );
+}
+
+/// "⚠ Flagged by 3 Eri vendors in the last 30 days" — from the Canary network (hashes only). Shows nothing
+/// when the count is 0, the switch is off, or there's no network.
+class CanaryNote extends ConsumerWidget {
+  const CanaryNote({super.key, this.sender, this.imageHash});
+  final String? sender;
+  final String? imageHash;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final n = ref.watch(canaryFlagsProvider((sender: sender, imageHash: imageHash))).value ?? 0;
+    if (n == 0) return const SizedBox.shrink();
+    final v = Theme.of(context).extension<EriVerdicts>()!;
+    return EnterOnce(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Pill(
+          '⚠ Flagged by $n Eri ${n == 1 ? 'vendor' : 'vendors'} in the last 30 days',
+          color: v.notReceived.withValues(alpha: 0.1),
+          textColor: v.notReceived,
+        ),
+      ),
+    );
+  }
+}
+
+/// Deliberate, one tap: sends only hashes (sender name, screenshot) so other vendors get warned.
+class WarnVendorsButton extends ConsumerWidget {
+  const WarnVendorsButton({super.key, this.sender, this.imageHash});
+  final String? sender;
+  final String? imageHash;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => TextButton.icon(
+    icon: const Icon(Icons.campaign_outlined, size: 18),
+    label: const Text('Warn other vendors'),
+    onPressed: () async {
+      final messenger = ScaffoldMessenger.of(context);
+      String msg;
+      try {
+        await (await ref.read(canaryProvider.future)).report(sender: sender, imageHash: imageHash);
+        ref.invalidate(canaryFlagsProvider);
+        msg = 'Other Eri vendors will be warned. Only a fingerprint was shared, no names or pictures.';
+      } catch (_) {
+        msg = 'Couldn’t reach the network. Try again when you’re online.';
+      }
+      messenger.showSnackBar(SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating));
+    },
   );
 }

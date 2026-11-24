@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eri/core/money.dart';
 import 'package:eri/core/time.dart';
+import 'package:eri/features/claims_widgets.dart';
 import 'package:eri/features/widgets.dart';
 import 'package:eri/providers.dart';
 import 'package:eri/receipts/receipt.dart';
@@ -199,6 +200,12 @@ class _VerdictCard extends StatelessWidget {
                   Expanded(child: Text(reason, style: const TextStyle(height: 1.4))),
                 ],
               ),
+            ),
+          CanaryNote(sender: f.sender, imageHash: r.imageHash),
+          if (r.verdict.verdict == Verdict.mismatch || r.verdict.verdict == Verdict.notReceived)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: WarnVendorsButton(sender: f.sender, imageHash: r.imageHash),
             ),
           if (rows.isNotEmpty) ...[
             const Divider(height: 24),

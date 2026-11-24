@@ -9,9 +9,10 @@ export 'package:eri/receipts/ocr_stub.dart'
     show ocrAvailable;
 
 class ReceiptResult {
-  const ReceiptResult(this.fields, this.verdict);
+  const ReceiptResult(this.fields, this.verdict, {this.imageHash});
   final ReceiptFields fields;
   final ReceiptVerdict verdict;
+  final String? imageHash; // sha256 of the screenshot bytes: the Canary fingerprint
 }
 
 /// Shared screenshot → text (on the phone) → fields → compared with real credits → stored (without the image).
@@ -54,6 +55,6 @@ class Receipts {
             imageHash: Value(imageHash),
           ),
         );
-    return ReceiptResult(fields, v);
+    return ReceiptResult(fields, v, imageHash: imageHash);
   }
 }
