@@ -42,6 +42,7 @@ class EriTabBar extends StatelessWidget {
             builder: (_, c) {
               final w = c.maxWidth / tabs.length;
               return Stack(
+                fit: StackFit.expand, // fill the pill, so labels centre and the highlight matches its height
                 children: [
                   // the highlight: one object that slides, so the eye follows it from tab to tab
                   // transform only (never `left`), and an implicit tween so a quick second tap retargets mid-slide
