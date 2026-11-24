@@ -3110,6 +3110,1309 @@ class IgnoreRulesCompanion extends UpdateCompanion<IgnoreRule> {
   }
 }
 
+class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExpensesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+  );
+  static const VerificationMeta _bankEventIdMeta = const VerificationMeta('bankEventId');
+  @override
+  late final GeneratedColumn<int> bankEventId = GeneratedColumn<int>(
+    'bank_event_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE REFERENCES bank_events (id)'),
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta('category');
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _setByUserMeta = const VerificationMeta('setByUser');
+  @override
+  late final GeneratedColumn<bool> setByUser = GeneratedColumn<bool>(
+    'set_by_user',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("set_by_user" IN (0, 1))'),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, bankEventId, category, setByUser];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'expenses';
+  @override
+  VerificationContext validateIntegrity(Insertable<Expense> instance, {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('bank_event_id')) {
+      context.handle(_bankEventIdMeta, bankEventId.isAcceptableOrUnknown(data['bank_event_id']!, _bankEventIdMeta));
+    } else if (isInserting) {
+      context.missing(_bankEventIdMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta, category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('set_by_user')) {
+      context.handle(_setByUserMeta, setByUser.isAcceptableOrUnknown(data['set_by_user']!, _setByUserMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Expense map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Expense(
+      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      bankEventId: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}bank_event_id'])!,
+      category: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}category'])!,
+      setByUser: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}set_by_user'])!,
+    );
+  }
+
+  @override
+  $ExpensesTable createAlias(String alias) {
+    return $ExpensesTable(attachedDatabase, alias);
+  }
+}
+
+class Expense extends DataClass implements Insertable<Expense> {
+  final int id;
+  final int bankEventId;
+  final String category;
+  final bool setByUser;
+  const Expense({required this.id, required this.bankEventId, required this.category, required this.setByUser});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['bank_event_id'] = Variable<int>(bankEventId);
+    map['category'] = Variable<String>(category);
+    map['set_by_user'] = Variable<bool>(setByUser);
+    return map;
+  }
+
+  ExpensesCompanion toCompanion(bool nullToAbsent) {
+    return ExpensesCompanion(
+      id: Value(id),
+      bankEventId: Value(bankEventId),
+      category: Value(category),
+      setByUser: Value(setByUser),
+    );
+  }
+
+  factory Expense.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Expense(
+      id: serializer.fromJson<int>(json['id']),
+      bankEventId: serializer.fromJson<int>(json['bankEventId']),
+      category: serializer.fromJson<String>(json['category']),
+      setByUser: serializer.fromJson<bool>(json['setByUser']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'bankEventId': serializer.toJson<int>(bankEventId),
+      'category': serializer.toJson<String>(category),
+      'setByUser': serializer.toJson<bool>(setByUser),
+    };
+  }
+
+  Expense copyWith({int? id, int? bankEventId, String? category, bool? setByUser}) => Expense(
+    id: id ?? this.id,
+    bankEventId: bankEventId ?? this.bankEventId,
+    category: category ?? this.category,
+    setByUser: setByUser ?? this.setByUser,
+  );
+  Expense copyWithCompanion(ExpensesCompanion data) {
+    return Expense(
+      id: data.id.present ? data.id.value : this.id,
+      bankEventId: data.bankEventId.present ? data.bankEventId.value : this.bankEventId,
+      category: data.category.present ? data.category.value : this.category,
+      setByUser: data.setByUser.present ? data.setByUser.value : this.setByUser,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Expense(')
+          ..write('id: $id, ')
+          ..write('bankEventId: $bankEventId, ')
+          ..write('category: $category, ')
+          ..write('setByUser: $setByUser')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, bankEventId, category, setByUser);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Expense &&
+          other.id == this.id &&
+          other.bankEventId == this.bankEventId &&
+          other.category == this.category &&
+          other.setByUser == this.setByUser);
+}
+
+class ExpensesCompanion extends UpdateCompanion<Expense> {
+  final Value<int> id;
+  final Value<int> bankEventId;
+  final Value<String> category;
+  final Value<bool> setByUser;
+  const ExpensesCompanion({
+    this.id = const Value.absent(),
+    this.bankEventId = const Value.absent(),
+    this.category = const Value.absent(),
+    this.setByUser = const Value.absent(),
+  });
+  ExpensesCompanion.insert({
+    this.id = const Value.absent(),
+    required int bankEventId,
+    required String category,
+    this.setByUser = const Value.absent(),
+  }) : bankEventId = Value(bankEventId),
+       category = Value(category);
+  static Insertable<Expense> custom({
+    Expression<int>? id,
+    Expression<int>? bankEventId,
+    Expression<String>? category,
+    Expression<bool>? setByUser,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (bankEventId != null) 'bank_event_id': bankEventId,
+      if (category != null) 'category': category,
+      if (setByUser != null) 'set_by_user': setByUser,
+    });
+  }
+
+  ExpensesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? bankEventId,
+    Value<String>? category,
+    Value<bool>? setByUser,
+  }) {
+    return ExpensesCompanion(
+      id: id ?? this.id,
+      bankEventId: bankEventId ?? this.bankEventId,
+      category: category ?? this.category,
+      setByUser: setByUser ?? this.setByUser,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (bankEventId.present) {
+      map['bank_event_id'] = Variable<int>(bankEventId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (setByUser.present) {
+      map['set_by_user'] = Variable<bool>(setByUser.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpensesCompanion(')
+          ..write('id: $id, ')
+          ..write('bankEventId: $bankEventId, ')
+          ..write('category: $category, ')
+          ..write('setByUser: $setByUser')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PaymentClaimsTable extends PaymentClaims with TableInfo<$PaymentClaimsTable, PaymentClaim> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PaymentClaimsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+  );
+  static const VerificationMeta _appMeta = const VerificationMeta('app');
+  @override
+  late final GeneratedColumn<String> app = GeneratedColumn<String>(
+    'app',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _senderMeta = const VerificationMeta('sender');
+  @override
+  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
+    'sender',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountKoboMeta = const VerificationMeta('amountKobo');
+  @override
+  late final GeneratedColumn<int> amountKobo = GeneratedColumn<int>(
+    'amount_kobo',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _previewMeta = const VerificationMeta('preview');
+  @override
+  late final GeneratedColumn<String> preview = GeneratedColumn<String>(
+    'preview',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _previewHashMeta = const VerificationMeta('previewHash');
+  @override
+  late final GeneratedColumn<String> previewHash = GeneratedColumn<String>(
+    'preview_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _claimedAtMeta = const VerificationMeta('claimedAt');
+  @override
+  late final GeneratedColumn<DateTime> claimedAt = GeneratedColumn<DateTime>(
+    'claimed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expiresAtMeta = const VerificationMeta('expiresAt');
+  @override
+  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
+    'expires_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bankEventIdMeta = const VerificationMeta('bankEventId');
+  @override
+  late final GeneratedColumn<int> bankEventId = GeneratedColumn<int>(
+    'bank_event_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('REFERENCES bank_events (id)'),
+  );
+  static const VerificationMeta _dismissedMeta = const VerificationMeta('dismissed');
+  @override
+  late final GeneratedColumn<bool> dismissed = GeneratedColumn<bool>(
+    'dismissed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("dismissed" IN (0, 1))'),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    app,
+    sender,
+    amountKobo,
+    preview,
+    previewHash,
+    claimedAt,
+    expiresAt,
+    status,
+    bankEventId,
+    dismissed,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'payment_claims';
+  @override
+  VerificationContext validateIntegrity(Insertable<PaymentClaim> instance, {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('app')) {
+      context.handle(_appMeta, app.isAcceptableOrUnknown(data['app']!, _appMeta));
+    } else if (isInserting) {
+      context.missing(_appMeta);
+    }
+    if (data.containsKey('sender')) {
+      context.handle(_senderMeta, sender.isAcceptableOrUnknown(data['sender']!, _senderMeta));
+    } else if (isInserting) {
+      context.missing(_senderMeta);
+    }
+    if (data.containsKey('amount_kobo')) {
+      context.handle(_amountKoboMeta, amountKobo.isAcceptableOrUnknown(data['amount_kobo']!, _amountKoboMeta));
+    }
+    if (data.containsKey('preview')) {
+      context.handle(_previewMeta, preview.isAcceptableOrUnknown(data['preview']!, _previewMeta));
+    }
+    if (data.containsKey('preview_hash')) {
+      context.handle(_previewHashMeta, previewHash.isAcceptableOrUnknown(data['preview_hash']!, _previewHashMeta));
+    } else if (isInserting) {
+      context.missing(_previewHashMeta);
+    }
+    if (data.containsKey('claimed_at')) {
+      context.handle(_claimedAtMeta, claimedAt.isAcceptableOrUnknown(data['claimed_at']!, _claimedAtMeta));
+    } else if (isInserting) {
+      context.missing(_claimedAtMeta);
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(_expiresAtMeta, expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta));
+    } else if (isInserting) {
+      context.missing(_expiresAtMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta, status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('bank_event_id')) {
+      context.handle(_bankEventIdMeta, bankEventId.isAcceptableOrUnknown(data['bank_event_id']!, _bankEventIdMeta));
+    }
+    if (data.containsKey('dismissed')) {
+      context.handle(_dismissedMeta, dismissed.isAcceptableOrUnknown(data['dismissed']!, _dismissedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PaymentClaim map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PaymentClaim(
+      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      app: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}app'])!,
+      sender: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}sender'])!,
+      amountKobo: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}amount_kobo']),
+      preview: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}preview']),
+      previewHash: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}preview_hash'])!,
+      claimedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}claimed_at'])!,
+      expiresAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}expires_at'])!,
+      status: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      bankEventId: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}bank_event_id']),
+      dismissed: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}dismissed'])!,
+    );
+  }
+
+  @override
+  $PaymentClaimsTable createAlias(String alias) {
+    return $PaymentClaimsTable(attachedDatabase, alias);
+  }
+}
+
+class PaymentClaim extends DataClass implements Insertable<PaymentClaim> {
+  final int id;
+  final String app;
+  final String sender;
+  final int? amountKobo;
+  final String? preview;
+  final String previewHash;
+  final DateTime claimedAt;
+  final DateTime expiresAt;
+  final String status;
+  final int? bankEventId;
+  final bool dismissed;
+  const PaymentClaim({
+    required this.id,
+    required this.app,
+    required this.sender,
+    this.amountKobo,
+    this.preview,
+    required this.previewHash,
+    required this.claimedAt,
+    required this.expiresAt,
+    required this.status,
+    this.bankEventId,
+    required this.dismissed,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['app'] = Variable<String>(app);
+    map['sender'] = Variable<String>(sender);
+    if (!nullToAbsent || amountKobo != null) {
+      map['amount_kobo'] = Variable<int>(amountKobo);
+    }
+    if (!nullToAbsent || preview != null) {
+      map['preview'] = Variable<String>(preview);
+    }
+    map['preview_hash'] = Variable<String>(previewHash);
+    map['claimed_at'] = Variable<DateTime>(claimedAt);
+    map['expires_at'] = Variable<DateTime>(expiresAt);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || bankEventId != null) {
+      map['bank_event_id'] = Variable<int>(bankEventId);
+    }
+    map['dismissed'] = Variable<bool>(dismissed);
+    return map;
+  }
+
+  PaymentClaimsCompanion toCompanion(bool nullToAbsent) {
+    return PaymentClaimsCompanion(
+      id: Value(id),
+      app: Value(app),
+      sender: Value(sender),
+      amountKobo: amountKobo == null && nullToAbsent ? const Value.absent() : Value(amountKobo),
+      preview: preview == null && nullToAbsent ? const Value.absent() : Value(preview),
+      previewHash: Value(previewHash),
+      claimedAt: Value(claimedAt),
+      expiresAt: Value(expiresAt),
+      status: Value(status),
+      bankEventId: bankEventId == null && nullToAbsent ? const Value.absent() : Value(bankEventId),
+      dismissed: Value(dismissed),
+    );
+  }
+
+  factory PaymentClaim.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PaymentClaim(
+      id: serializer.fromJson<int>(json['id']),
+      app: serializer.fromJson<String>(json['app']),
+      sender: serializer.fromJson<String>(json['sender']),
+      amountKobo: serializer.fromJson<int?>(json['amountKobo']),
+      preview: serializer.fromJson<String?>(json['preview']),
+      previewHash: serializer.fromJson<String>(json['previewHash']),
+      claimedAt: serializer.fromJson<DateTime>(json['claimedAt']),
+      expiresAt: serializer.fromJson<DateTime>(json['expiresAt']),
+      status: serializer.fromJson<String>(json['status']),
+      bankEventId: serializer.fromJson<int?>(json['bankEventId']),
+      dismissed: serializer.fromJson<bool>(json['dismissed']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'app': serializer.toJson<String>(app),
+      'sender': serializer.toJson<String>(sender),
+      'amountKobo': serializer.toJson<int?>(amountKobo),
+      'preview': serializer.toJson<String?>(preview),
+      'previewHash': serializer.toJson<String>(previewHash),
+      'claimedAt': serializer.toJson<DateTime>(claimedAt),
+      'expiresAt': serializer.toJson<DateTime>(expiresAt),
+      'status': serializer.toJson<String>(status),
+      'bankEventId': serializer.toJson<int?>(bankEventId),
+      'dismissed': serializer.toJson<bool>(dismissed),
+    };
+  }
+
+  PaymentClaim copyWith({
+    int? id,
+    String? app,
+    String? sender,
+    Value<int?> amountKobo = const Value.absent(),
+    Value<String?> preview = const Value.absent(),
+    String? previewHash,
+    DateTime? claimedAt,
+    DateTime? expiresAt,
+    String? status,
+    Value<int?> bankEventId = const Value.absent(),
+    bool? dismissed,
+  }) => PaymentClaim(
+    id: id ?? this.id,
+    app: app ?? this.app,
+    sender: sender ?? this.sender,
+    amountKobo: amountKobo.present ? amountKobo.value : this.amountKobo,
+    preview: preview.present ? preview.value : this.preview,
+    previewHash: previewHash ?? this.previewHash,
+    claimedAt: claimedAt ?? this.claimedAt,
+    expiresAt: expiresAt ?? this.expiresAt,
+    status: status ?? this.status,
+    bankEventId: bankEventId.present ? bankEventId.value : this.bankEventId,
+    dismissed: dismissed ?? this.dismissed,
+  );
+  PaymentClaim copyWithCompanion(PaymentClaimsCompanion data) {
+    return PaymentClaim(
+      id: data.id.present ? data.id.value : this.id,
+      app: data.app.present ? data.app.value : this.app,
+      sender: data.sender.present ? data.sender.value : this.sender,
+      amountKobo: data.amountKobo.present ? data.amountKobo.value : this.amountKobo,
+      preview: data.preview.present ? data.preview.value : this.preview,
+      previewHash: data.previewHash.present ? data.previewHash.value : this.previewHash,
+      claimedAt: data.claimedAt.present ? data.claimedAt.value : this.claimedAt,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      status: data.status.present ? data.status.value : this.status,
+      bankEventId: data.bankEventId.present ? data.bankEventId.value : this.bankEventId,
+      dismissed: data.dismissed.present ? data.dismissed.value : this.dismissed,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaymentClaim(')
+          ..write('id: $id, ')
+          ..write('app: $app, ')
+          ..write('sender: $sender, ')
+          ..write('amountKobo: $amountKobo, ')
+          ..write('preview: $preview, ')
+          ..write('previewHash: $previewHash, ')
+          ..write('claimedAt: $claimedAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('status: $status, ')
+          ..write('bankEventId: $bankEventId, ')
+          ..write('dismissed: $dismissed')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    app,
+    sender,
+    amountKobo,
+    preview,
+    previewHash,
+    claimedAt,
+    expiresAt,
+    status,
+    bankEventId,
+    dismissed,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PaymentClaim &&
+          other.id == this.id &&
+          other.app == this.app &&
+          other.sender == this.sender &&
+          other.amountKobo == this.amountKobo &&
+          other.preview == this.preview &&
+          other.previewHash == this.previewHash &&
+          other.claimedAt == this.claimedAt &&
+          other.expiresAt == this.expiresAt &&
+          other.status == this.status &&
+          other.bankEventId == this.bankEventId &&
+          other.dismissed == this.dismissed);
+}
+
+class PaymentClaimsCompanion extends UpdateCompanion<PaymentClaim> {
+  final Value<int> id;
+  final Value<String> app;
+  final Value<String> sender;
+  final Value<int?> amountKobo;
+  final Value<String?> preview;
+  final Value<String> previewHash;
+  final Value<DateTime> claimedAt;
+  final Value<DateTime> expiresAt;
+  final Value<String> status;
+  final Value<int?> bankEventId;
+  final Value<bool> dismissed;
+  const PaymentClaimsCompanion({
+    this.id = const Value.absent(),
+    this.app = const Value.absent(),
+    this.sender = const Value.absent(),
+    this.amountKobo = const Value.absent(),
+    this.preview = const Value.absent(),
+    this.previewHash = const Value.absent(),
+    this.claimedAt = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.bankEventId = const Value.absent(),
+    this.dismissed = const Value.absent(),
+  });
+  PaymentClaimsCompanion.insert({
+    this.id = const Value.absent(),
+    required String app,
+    required String sender,
+    this.amountKobo = const Value.absent(),
+    this.preview = const Value.absent(),
+    required String previewHash,
+    required DateTime claimedAt,
+    required DateTime expiresAt,
+    required String status,
+    this.bankEventId = const Value.absent(),
+    this.dismissed = const Value.absent(),
+  }) : app = Value(app),
+       sender = Value(sender),
+       previewHash = Value(previewHash),
+       claimedAt = Value(claimedAt),
+       expiresAt = Value(expiresAt),
+       status = Value(status);
+  static Insertable<PaymentClaim> custom({
+    Expression<int>? id,
+    Expression<String>? app,
+    Expression<String>? sender,
+    Expression<int>? amountKobo,
+    Expression<String>? preview,
+    Expression<String>? previewHash,
+    Expression<DateTime>? claimedAt,
+    Expression<DateTime>? expiresAt,
+    Expression<String>? status,
+    Expression<int>? bankEventId,
+    Expression<bool>? dismissed,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (app != null) 'app': app,
+      if (sender != null) 'sender': sender,
+      if (amountKobo != null) 'amount_kobo': amountKobo,
+      if (preview != null) 'preview': preview,
+      if (previewHash != null) 'preview_hash': previewHash,
+      if (claimedAt != null) 'claimed_at': claimedAt,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (status != null) 'status': status,
+      if (bankEventId != null) 'bank_event_id': bankEventId,
+      if (dismissed != null) 'dismissed': dismissed,
+    });
+  }
+
+  PaymentClaimsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? app,
+    Value<String>? sender,
+    Value<int?>? amountKobo,
+    Value<String?>? preview,
+    Value<String>? previewHash,
+    Value<DateTime>? claimedAt,
+    Value<DateTime>? expiresAt,
+    Value<String>? status,
+    Value<int?>? bankEventId,
+    Value<bool>? dismissed,
+  }) {
+    return PaymentClaimsCompanion(
+      id: id ?? this.id,
+      app: app ?? this.app,
+      sender: sender ?? this.sender,
+      amountKobo: amountKobo ?? this.amountKobo,
+      preview: preview ?? this.preview,
+      previewHash: previewHash ?? this.previewHash,
+      claimedAt: claimedAt ?? this.claimedAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+      status: status ?? this.status,
+      bankEventId: bankEventId ?? this.bankEventId,
+      dismissed: dismissed ?? this.dismissed,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (app.present) {
+      map['app'] = Variable<String>(app.value);
+    }
+    if (sender.present) {
+      map['sender'] = Variable<String>(sender.value);
+    }
+    if (amountKobo.present) {
+      map['amount_kobo'] = Variable<int>(amountKobo.value);
+    }
+    if (preview.present) {
+      map['preview'] = Variable<String>(preview.value);
+    }
+    if (previewHash.present) {
+      map['preview_hash'] = Variable<String>(previewHash.value);
+    }
+    if (claimedAt.present) {
+      map['claimed_at'] = Variable<DateTime>(claimedAt.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<DateTime>(expiresAt.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (bankEventId.present) {
+      map['bank_event_id'] = Variable<int>(bankEventId.value);
+    }
+    if (dismissed.present) {
+      map['dismissed'] = Variable<bool>(dismissed.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaymentClaimsCompanion(')
+          ..write('id: $id, ')
+          ..write('app: $app, ')
+          ..write('sender: $sender, ')
+          ..write('amountKobo: $amountKobo, ')
+          ..write('preview: $preview, ')
+          ..write('previewHash: $previewHash, ')
+          ..write('claimedAt: $claimedAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('status: $status, ')
+          ..write('bankEventId: $bankEventId, ')
+          ..write('dismissed: $dismissed')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReceiptChecksTable extends ReceiptChecks with TableInfo<$ReceiptChecksTable, ReceiptCheck> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReceiptChecksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+  );
+  static const VerificationMeta _amountKoboMeta = const VerificationMeta('amountKobo');
+  @override
+  late final GeneratedColumn<int> amountKobo = GeneratedColumn<int>(
+    'amount_kobo',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _senderMeta = const VerificationMeta('sender');
+  @override
+  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
+    'sender',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bankMeta = const VerificationMeta('bank');
+  @override
+  late final GeneratedColumn<String> bank = GeneratedColumn<String>(
+    'bank',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _receiptTimeMeta = const VerificationMeta('receiptTime');
+  @override
+  late final GeneratedColumn<DateTime> receiptTime = GeneratedColumn<DateTime>(
+    'receipt_time',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _verdictMeta = const VerificationMeta('verdict');
+  @override
+  late final GeneratedColumn<String> verdict = GeneratedColumn<String>(
+    'verdict',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonsMeta = const VerificationMeta('reasons');
+  @override
+  late final GeneratedColumn<String> reasons = GeneratedColumn<String>(
+    'reasons',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bankEventIdMeta = const VerificationMeta('bankEventId');
+  @override
+  late final GeneratedColumn<int> bankEventId = GeneratedColumn<int>(
+    'bank_event_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('REFERENCES bank_events (id)'),
+  );
+  static const VerificationMeta _imageHashMeta = const VerificationMeta('imageHash');
+  @override
+  late final GeneratedColumn<String> imageHash = GeneratedColumn<String>(
+    'image_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _checkedAtMeta = const VerificationMeta('checkedAt');
+  @override
+  late final GeneratedColumn<DateTime> checkedAt = GeneratedColumn<DateTime>(
+    'checked_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    amountKobo,
+    sender,
+    bank,
+    receiptTime,
+    verdict,
+    reasons,
+    bankEventId,
+    imageHash,
+    checkedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'receipt_checks';
+  @override
+  VerificationContext validateIntegrity(Insertable<ReceiptCheck> instance, {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('amount_kobo')) {
+      context.handle(_amountKoboMeta, amountKobo.isAcceptableOrUnknown(data['amount_kobo']!, _amountKoboMeta));
+    }
+    if (data.containsKey('sender')) {
+      context.handle(_senderMeta, sender.isAcceptableOrUnknown(data['sender']!, _senderMeta));
+    }
+    if (data.containsKey('bank')) {
+      context.handle(_bankMeta, bank.isAcceptableOrUnknown(data['bank']!, _bankMeta));
+    }
+    if (data.containsKey('receipt_time')) {
+      context.handle(_receiptTimeMeta, receiptTime.isAcceptableOrUnknown(data['receipt_time']!, _receiptTimeMeta));
+    }
+    if (data.containsKey('verdict')) {
+      context.handle(_verdictMeta, verdict.isAcceptableOrUnknown(data['verdict']!, _verdictMeta));
+    } else if (isInserting) {
+      context.missing(_verdictMeta);
+    }
+    if (data.containsKey('reasons')) {
+      context.handle(_reasonsMeta, reasons.isAcceptableOrUnknown(data['reasons']!, _reasonsMeta));
+    } else if (isInserting) {
+      context.missing(_reasonsMeta);
+    }
+    if (data.containsKey('bank_event_id')) {
+      context.handle(_bankEventIdMeta, bankEventId.isAcceptableOrUnknown(data['bank_event_id']!, _bankEventIdMeta));
+    }
+    if (data.containsKey('image_hash')) {
+      context.handle(_imageHashMeta, imageHash.isAcceptableOrUnknown(data['image_hash']!, _imageHashMeta));
+    }
+    if (data.containsKey('checked_at')) {
+      context.handle(_checkedAtMeta, checkedAt.isAcceptableOrUnknown(data['checked_at']!, _checkedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReceiptCheck map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReceiptCheck(
+      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      amountKobo: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}amount_kobo']),
+      sender: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}sender']),
+      bank: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}bank']),
+      receiptTime: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}receipt_time']),
+      verdict: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}verdict'])!,
+      reasons: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}reasons'])!,
+      bankEventId: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}bank_event_id']),
+      imageHash: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}image_hash']),
+      checkedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}checked_at'])!,
+    );
+  }
+
+  @override
+  $ReceiptChecksTable createAlias(String alias) {
+    return $ReceiptChecksTable(attachedDatabase, alias);
+  }
+}
+
+class ReceiptCheck extends DataClass implements Insertable<ReceiptCheck> {
+  final int id;
+  final int? amountKobo;
+  final String? sender;
+  final String? bank;
+  final DateTime? receiptTime;
+  final String verdict;
+  final String reasons;
+  final int? bankEventId;
+  final String? imageHash;
+  final DateTime checkedAt;
+  const ReceiptCheck({
+    required this.id,
+    this.amountKobo,
+    this.sender,
+    this.bank,
+    this.receiptTime,
+    required this.verdict,
+    required this.reasons,
+    this.bankEventId,
+    this.imageHash,
+    required this.checkedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || amountKobo != null) {
+      map['amount_kobo'] = Variable<int>(amountKobo);
+    }
+    if (!nullToAbsent || sender != null) {
+      map['sender'] = Variable<String>(sender);
+    }
+    if (!nullToAbsent || bank != null) {
+      map['bank'] = Variable<String>(bank);
+    }
+    if (!nullToAbsent || receiptTime != null) {
+      map['receipt_time'] = Variable<DateTime>(receiptTime);
+    }
+    map['verdict'] = Variable<String>(verdict);
+    map['reasons'] = Variable<String>(reasons);
+    if (!nullToAbsent || bankEventId != null) {
+      map['bank_event_id'] = Variable<int>(bankEventId);
+    }
+    if (!nullToAbsent || imageHash != null) {
+      map['image_hash'] = Variable<String>(imageHash);
+    }
+    map['checked_at'] = Variable<DateTime>(checkedAt);
+    return map;
+  }
+
+  ReceiptChecksCompanion toCompanion(bool nullToAbsent) {
+    return ReceiptChecksCompanion(
+      id: Value(id),
+      amountKobo: amountKobo == null && nullToAbsent ? const Value.absent() : Value(amountKobo),
+      sender: sender == null && nullToAbsent ? const Value.absent() : Value(sender),
+      bank: bank == null && nullToAbsent ? const Value.absent() : Value(bank),
+      receiptTime: receiptTime == null && nullToAbsent ? const Value.absent() : Value(receiptTime),
+      verdict: Value(verdict),
+      reasons: Value(reasons),
+      bankEventId: bankEventId == null && nullToAbsent ? const Value.absent() : Value(bankEventId),
+      imageHash: imageHash == null && nullToAbsent ? const Value.absent() : Value(imageHash),
+      checkedAt: Value(checkedAt),
+    );
+  }
+
+  factory ReceiptCheck.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReceiptCheck(
+      id: serializer.fromJson<int>(json['id']),
+      amountKobo: serializer.fromJson<int?>(json['amountKobo']),
+      sender: serializer.fromJson<String?>(json['sender']),
+      bank: serializer.fromJson<String?>(json['bank']),
+      receiptTime: serializer.fromJson<DateTime?>(json['receiptTime']),
+      verdict: serializer.fromJson<String>(json['verdict']),
+      reasons: serializer.fromJson<String>(json['reasons']),
+      bankEventId: serializer.fromJson<int?>(json['bankEventId']),
+      imageHash: serializer.fromJson<String?>(json['imageHash']),
+      checkedAt: serializer.fromJson<DateTime>(json['checkedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'amountKobo': serializer.toJson<int?>(amountKobo),
+      'sender': serializer.toJson<String?>(sender),
+      'bank': serializer.toJson<String?>(bank),
+      'receiptTime': serializer.toJson<DateTime?>(receiptTime),
+      'verdict': serializer.toJson<String>(verdict),
+      'reasons': serializer.toJson<String>(reasons),
+      'bankEventId': serializer.toJson<int?>(bankEventId),
+      'imageHash': serializer.toJson<String?>(imageHash),
+      'checkedAt': serializer.toJson<DateTime>(checkedAt),
+    };
+  }
+
+  ReceiptCheck copyWith({
+    int? id,
+    Value<int?> amountKobo = const Value.absent(),
+    Value<String?> sender = const Value.absent(),
+    Value<String?> bank = const Value.absent(),
+    Value<DateTime?> receiptTime = const Value.absent(),
+    String? verdict,
+    String? reasons,
+    Value<int?> bankEventId = const Value.absent(),
+    Value<String?> imageHash = const Value.absent(),
+    DateTime? checkedAt,
+  }) => ReceiptCheck(
+    id: id ?? this.id,
+    amountKobo: amountKobo.present ? amountKobo.value : this.amountKobo,
+    sender: sender.present ? sender.value : this.sender,
+    bank: bank.present ? bank.value : this.bank,
+    receiptTime: receiptTime.present ? receiptTime.value : this.receiptTime,
+    verdict: verdict ?? this.verdict,
+    reasons: reasons ?? this.reasons,
+    bankEventId: bankEventId.present ? bankEventId.value : this.bankEventId,
+    imageHash: imageHash.present ? imageHash.value : this.imageHash,
+    checkedAt: checkedAt ?? this.checkedAt,
+  );
+  ReceiptCheck copyWithCompanion(ReceiptChecksCompanion data) {
+    return ReceiptCheck(
+      id: data.id.present ? data.id.value : this.id,
+      amountKobo: data.amountKobo.present ? data.amountKobo.value : this.amountKobo,
+      sender: data.sender.present ? data.sender.value : this.sender,
+      bank: data.bank.present ? data.bank.value : this.bank,
+      receiptTime: data.receiptTime.present ? data.receiptTime.value : this.receiptTime,
+      verdict: data.verdict.present ? data.verdict.value : this.verdict,
+      reasons: data.reasons.present ? data.reasons.value : this.reasons,
+      bankEventId: data.bankEventId.present ? data.bankEventId.value : this.bankEventId,
+      imageHash: data.imageHash.present ? data.imageHash.value : this.imageHash,
+      checkedAt: data.checkedAt.present ? data.checkedAt.value : this.checkedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReceiptCheck(')
+          ..write('id: $id, ')
+          ..write('amountKobo: $amountKobo, ')
+          ..write('sender: $sender, ')
+          ..write('bank: $bank, ')
+          ..write('receiptTime: $receiptTime, ')
+          ..write('verdict: $verdict, ')
+          ..write('reasons: $reasons, ')
+          ..write('bankEventId: $bankEventId, ')
+          ..write('imageHash: $imageHash, ')
+          ..write('checkedAt: $checkedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, amountKobo, sender, bank, receiptTime, verdict, reasons, bankEventId, imageHash, checkedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReceiptCheck &&
+          other.id == this.id &&
+          other.amountKobo == this.amountKobo &&
+          other.sender == this.sender &&
+          other.bank == this.bank &&
+          other.receiptTime == this.receiptTime &&
+          other.verdict == this.verdict &&
+          other.reasons == this.reasons &&
+          other.bankEventId == this.bankEventId &&
+          other.imageHash == this.imageHash &&
+          other.checkedAt == this.checkedAt);
+}
+
+class ReceiptChecksCompanion extends UpdateCompanion<ReceiptCheck> {
+  final Value<int> id;
+  final Value<int?> amountKobo;
+  final Value<String?> sender;
+  final Value<String?> bank;
+  final Value<DateTime?> receiptTime;
+  final Value<String> verdict;
+  final Value<String> reasons;
+  final Value<int?> bankEventId;
+  final Value<String?> imageHash;
+  final Value<DateTime> checkedAt;
+  const ReceiptChecksCompanion({
+    this.id = const Value.absent(),
+    this.amountKobo = const Value.absent(),
+    this.sender = const Value.absent(),
+    this.bank = const Value.absent(),
+    this.receiptTime = const Value.absent(),
+    this.verdict = const Value.absent(),
+    this.reasons = const Value.absent(),
+    this.bankEventId = const Value.absent(),
+    this.imageHash = const Value.absent(),
+    this.checkedAt = const Value.absent(),
+  });
+  ReceiptChecksCompanion.insert({
+    this.id = const Value.absent(),
+    this.amountKobo = const Value.absent(),
+    this.sender = const Value.absent(),
+    this.bank = const Value.absent(),
+    this.receiptTime = const Value.absent(),
+    required String verdict,
+    required String reasons,
+    this.bankEventId = const Value.absent(),
+    this.imageHash = const Value.absent(),
+    this.checkedAt = const Value.absent(),
+  }) : verdict = Value(verdict),
+       reasons = Value(reasons);
+  static Insertable<ReceiptCheck> custom({
+    Expression<int>? id,
+    Expression<int>? amountKobo,
+    Expression<String>? sender,
+    Expression<String>? bank,
+    Expression<DateTime>? receiptTime,
+    Expression<String>? verdict,
+    Expression<String>? reasons,
+    Expression<int>? bankEventId,
+    Expression<String>? imageHash,
+    Expression<DateTime>? checkedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (amountKobo != null) 'amount_kobo': amountKobo,
+      if (sender != null) 'sender': sender,
+      if (bank != null) 'bank': bank,
+      if (receiptTime != null) 'receipt_time': receiptTime,
+      if (verdict != null) 'verdict': verdict,
+      if (reasons != null) 'reasons': reasons,
+      if (bankEventId != null) 'bank_event_id': bankEventId,
+      if (imageHash != null) 'image_hash': imageHash,
+      if (checkedAt != null) 'checked_at': checkedAt,
+    });
+  }
+
+  ReceiptChecksCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? amountKobo,
+    Value<String?>? sender,
+    Value<String?>? bank,
+    Value<DateTime?>? receiptTime,
+    Value<String>? verdict,
+    Value<String>? reasons,
+    Value<int?>? bankEventId,
+    Value<String?>? imageHash,
+    Value<DateTime>? checkedAt,
+  }) {
+    return ReceiptChecksCompanion(
+      id: id ?? this.id,
+      amountKobo: amountKobo ?? this.amountKobo,
+      sender: sender ?? this.sender,
+      bank: bank ?? this.bank,
+      receiptTime: receiptTime ?? this.receiptTime,
+      verdict: verdict ?? this.verdict,
+      reasons: reasons ?? this.reasons,
+      bankEventId: bankEventId ?? this.bankEventId,
+      imageHash: imageHash ?? this.imageHash,
+      checkedAt: checkedAt ?? this.checkedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (amountKobo.present) {
+      map['amount_kobo'] = Variable<int>(amountKobo.value);
+    }
+    if (sender.present) {
+      map['sender'] = Variable<String>(sender.value);
+    }
+    if (bank.present) {
+      map['bank'] = Variable<String>(bank.value);
+    }
+    if (receiptTime.present) {
+      map['receipt_time'] = Variable<DateTime>(receiptTime.value);
+    }
+    if (verdict.present) {
+      map['verdict'] = Variable<String>(verdict.value);
+    }
+    if (reasons.present) {
+      map['reasons'] = Variable<String>(reasons.value);
+    }
+    if (bankEventId.present) {
+      map['bank_event_id'] = Variable<int>(bankEventId.value);
+    }
+    if (imageHash.present) {
+      map['image_hash'] = Variable<String>(imageHash.value);
+    }
+    if (checkedAt.present) {
+      map['checked_at'] = Variable<DateTime>(checkedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReceiptChecksCompanion(')
+          ..write('id: $id, ')
+          ..write('amountKobo: $amountKobo, ')
+          ..write('sender: $sender, ')
+          ..write('bank: $bank, ')
+          ..write('receiptTime: $receiptTime, ')
+          ..write('verdict: $verdict, ')
+          ..write('reasons: $reasons, ')
+          ..write('bankEventId: $bankEventId, ')
+          ..write('imageHash: $imageHash, ')
+          ..write('checkedAt: $checkedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$EriDb extends GeneratedDatabase {
   _$EriDb(QueryExecutor e) : super(e);
   $EriDbManager get managers => $EriDbManager(this);
@@ -3121,6 +4424,9 @@ abstract class _$EriDb extends GeneratedDatabase {
   late final $OrderItemsTable orderItems = $OrderItemsTable(this);
   late final $MatchesTable matches = $MatchesTable(this);
   late final $IgnoreRulesTable ignoreRules = $IgnoreRulesTable(this);
+  late final $ExpensesTable expenses = $ExpensesTable(this);
+  late final $PaymentClaimsTable paymentClaims = $PaymentClaimsTable(this);
+  late final $ReceiptChecksTable receiptChecks = $ReceiptChecksTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
@@ -3133,6 +4439,9 @@ abstract class _$EriDb extends GeneratedDatabase {
     orderItems,
     matches,
     ignoreRules,
+    expenses,
+    paymentClaims,
+    receiptChecks,
   ];
 }
 
@@ -3367,6 +4676,45 @@ final class $$BankEventsTableReferences extends BaseReferences<_$EriDb, $BankEve
     final cache = $_typedResult.readTableOrNull(_matchesRefsTable($_db));
     return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(_$EriDb db) =>
+      MultiTypedResultKey.fromTable(db.expenses, aliasName: 'bank_events__id__expenses__bank_event_id');
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager(
+      $_db,
+      $_db.expenses,
+    ).filter((f) => f.bankEventId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$PaymentClaimsTable, List<PaymentClaim>> _paymentClaimsRefsTable(_$EriDb db) =>
+      MultiTypedResultKey.fromTable(db.paymentClaims, aliasName: 'bank_events__id__payment_claims__bank_event_id');
+
+  $$PaymentClaimsTableProcessedTableManager get paymentClaimsRefs {
+    final manager = $$PaymentClaimsTableTableManager(
+      $_db,
+      $_db.paymentClaims,
+    ).filter((f) => f.bankEventId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_paymentClaimsRefsTable($_db));
+    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$ReceiptChecksTable, List<ReceiptCheck>> _receiptChecksRefsTable(_$EriDb db) =>
+      MultiTypedResultKey.fromTable(db.receiptChecks, aliasName: 'bank_events__id__receipt_checks__bank_event_id');
+
+  $$ReceiptChecksTableProcessedTableManager get receiptChecksRefs {
+    final manager = $$ReceiptChecksTableTableManager(
+      $_db,
+      $_db.receiptChecks,
+    ).filter((f) => f.bankEventId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_receiptChecksRefsTable($_db));
+    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$BankEventsTableFilterComposer extends Composer<_$EriDb, $BankEventsTable> {
@@ -3418,6 +4766,60 @@ class $$BankEventsTableFilterComposer extends Composer<_$EriDb, $BankEventsTable
           $$MatchesTableFilterComposer(
             $db: $db,
             $table: $db.matches,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> expensesRefs(Expression<bool> Function($$ExpensesTableFilterComposer f) f) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.bankEventId,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$ExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> paymentClaimsRefs(Expression<bool> Function($$PaymentClaimsTableFilterComposer f) f) {
+    final $$PaymentClaimsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.paymentClaims,
+      getReferencedColumn: (t) => t.bankEventId,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$PaymentClaimsTableFilterComposer(
+            $db: $db,
+            $table: $db.paymentClaims,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> receiptChecksRefs(Expression<bool> Function($$ReceiptChecksTableFilterComposer f) f) {
+    final $$ReceiptChecksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.receiptChecks,
+      getReferencedColumn: (t) => t.bankEventId,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$ReceiptChecksTableFilterComposer(
+            $db: $db,
+            $table: $db.receiptChecks,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
@@ -3517,6 +4919,64 @@ class $$BankEventsTableAnnotationComposer extends Composer<_$EriDb, $BankEventsT
     );
     return f(composer);
   }
+
+  Expression<T> expensesRefs<T extends Object>(Expression<T> Function($$ExpensesTableAnnotationComposer a) f) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.bankEventId,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$ExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> paymentClaimsRefs<T extends Object>(
+    Expression<T> Function($$PaymentClaimsTableAnnotationComposer a) f,
+  ) {
+    final $$PaymentClaimsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.paymentClaims,
+      getReferencedColumn: (t) => t.bankEventId,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$PaymentClaimsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.paymentClaims,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> receiptChecksRefs<T extends Object>(
+    Expression<T> Function($$ReceiptChecksTableAnnotationComposer a) f,
+  ) {
+    final $$ReceiptChecksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.receiptChecks,
+      getReferencedColumn: (t) => t.bankEventId,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$ReceiptChecksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.receiptChecks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$BankEventsTableTableManager
@@ -3532,7 +4992,7 @@ class $$BankEventsTableTableManager
           $$BankEventsTableUpdateCompanionBuilder,
           (BankEvent, $$BankEventsTableReferences),
           BankEvent,
-          PrefetchHooks Function({bool matchesRefs})
+          PrefetchHooks Function({bool matchesRefs, bool expensesRefs, bool paymentClaimsRefs, bool receiptChecksRefs})
         > {
   $$BankEventsTableTableManager(_$EriDb db, $BankEventsTable table)
     : super(
@@ -3597,26 +5057,69 @@ class $$BankEventsTableTableManager
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable<$BankEventsTable, BankEvent>(table), $$BankEventsTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({matchesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (matchesRefs) db.matches],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (matchesRefs)
-                    await $_getPrefetchedDataByColumns<BankEvent, $BankEventsTable, SaleMatch, $MatchesTable>(
-                      currentTable: table,
-                      referencedTable: $$BankEventsTableReferences._matchesRefsTable(db),
-                      managerFromTypedResult: (p0) => $$BankEventsTableReferences(db, table, p0).matchesRefs,
-                      currentColumn: 'id',
-                      referencedColumn: 'bank_event_id',
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({matchesRefs = false, expensesRefs = false, paymentClaimsRefs = false, receiptChecksRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (matchesRefs) db.matches,
+                    if (expensesRefs) db.expenses,
+                    if (paymentClaimsRefs) db.paymentClaims,
+                    if (receiptChecksRefs) db.receiptChecks,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (matchesRefs)
+                        await $_getPrefetchedDataByColumns<BankEvent, $BankEventsTable, SaleMatch, $MatchesTable>(
+                          currentTable: table,
+                          referencedTable: $$BankEventsTableReferences._matchesRefsTable(db),
+                          managerFromTypedResult: (p0) => $$BankEventsTableReferences(db, table, p0).matchesRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'bank_event_id',
+                          typedResults: items,
+                        ),
+                      if (expensesRefs)
+                        await $_getPrefetchedDataByColumns<BankEvent, $BankEventsTable, Expense, $ExpensesTable>(
+                          currentTable: table,
+                          referencedTable: $$BankEventsTableReferences._expensesRefsTable(db),
+                          managerFromTypedResult: (p0) => $$BankEventsTableReferences(db, table, p0).expensesRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'bank_event_id',
+                          typedResults: items,
+                        ),
+                      if (paymentClaimsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          BankEvent,
+                          $BankEventsTable,
+                          PaymentClaim,
+                          $PaymentClaimsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BankEventsTableReferences._paymentClaimsRefsTable(db),
+                          managerFromTypedResult: (p0) => $$BankEventsTableReferences(db, table, p0).paymentClaimsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'bank_event_id',
+                          typedResults: items,
+                        ),
+                      if (receiptChecksRefs)
+                        await $_getPrefetchedDataByColumns<
+                          BankEvent,
+                          $BankEventsTable,
+                          ReceiptCheck,
+                          $ReceiptChecksTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BankEventsTableReferences._receiptChecksRefsTable(db),
+                          managerFromTypedResult: (p0) => $$BankEventsTableReferences(db, table, p0).receiptChecksRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'bank_event_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -3633,7 +5136,7 @@ typedef $$BankEventsTableProcessedTableManager =
       $$BankEventsTableUpdateCompanionBuilder,
       (BankEvent, $$BankEventsTableReferences),
       BankEvent,
-      PrefetchHooks Function({bool matchesRefs})
+      PrefetchHooks Function({bool matchesRefs, bool expensesRefs, bool paymentClaimsRefs, bool receiptChecksRefs})
     >;
 typedef $$ProductsTableCreateCompanionBuilder =
     ProductsCompanion Function({
@@ -5385,6 +6888,904 @@ typedef $$IgnoreRulesTableProcessedTableManager =
       IgnoreRule,
       PrefetchHooks Function()
     >;
+typedef $$ExpensesTableCreateCompanionBuilder =
+    ExpensesCompanion Function({
+      Value<int> id,
+      required int bankEventId,
+      required String category,
+      Value<bool> setByUser,
+    });
+typedef $$ExpensesTableUpdateCompanionBuilder =
+    ExpensesCompanion Function({Value<int> id, Value<int> bankEventId, Value<String> category, Value<bool> setByUser});
+
+final class $$ExpensesTableReferences extends BaseReferences<_$EriDb, $ExpensesTable, Expense> {
+  $$ExpensesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $BankEventsTable _bankEventIdTable(_$EriDb db) =>
+      db.bankEvents.createAlias('expenses__bank_event_id__bank_events__id');
+
+  $$BankEventsTableProcessedTableManager get bankEventId {
+    final $_column = $_itemColumn<int>('bank_event_id')!;
+
+    final manager = $$BankEventsTableTableManager($_db, $_db.bankEvents).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_bankEventIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$ExpensesTableFilterComposer extends Composer<_$EriDb, $ExpensesTable> {
+  $$ExpensesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get setByUser =>
+      $composableBuilder(column: $table.setByUser, builder: (column) => ColumnFilters(column));
+
+  $$BankEventsTableFilterComposer get bankEventId {
+    final $$BankEventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableFilterComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpensesTableOrderingComposer extends Composer<_$EriDb, $ExpensesTable> {
+  $$ExpensesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get setByUser =>
+      $composableBuilder(column: $table.setByUser, builder: (column) => ColumnOrderings(column));
+
+  $$BankEventsTableOrderingComposer get bankEventId {
+    final $$BankEventsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableOrderingComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpensesTableAnnotationComposer extends Composer<_$EriDb, $ExpensesTable> {
+  $$ExpensesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get category => $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<bool> get setByUser => $composableBuilder(column: $table.setByUser, builder: (column) => column);
+
+  $$BankEventsTableAnnotationComposer get bankEventId {
+    final $$BankEventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpensesTableTableManager
+    extends
+        RootTableManager<
+          _$EriDb,
+          $ExpensesTable,
+          Expense,
+          $$ExpensesTableFilterComposer,
+          $$ExpensesTableOrderingComposer,
+          $$ExpensesTableAnnotationComposer,
+          $$ExpensesTableCreateCompanionBuilder,
+          $$ExpensesTableUpdateCompanionBuilder,
+          (Expense, $$ExpensesTableReferences),
+          Expense,
+          PrefetchHooks Function({bool bankEventId})
+        > {
+  $$ExpensesTableTableManager(_$EriDb db, $ExpensesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$ExpensesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ExpensesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ExpensesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> bankEventId = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<bool> setByUser = const Value.absent(),
+              }) => ExpensesCompanion(id: id, bankEventId: bankEventId, category: category, setByUser: setByUser),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int bankEventId,
+                required String category,
+                Value<bool> setByUser = const Value.absent(),
+              }) =>
+                  ExpensesCompanion.insert(id: id, bankEventId: bankEventId, category: category, setByUser: setByUser),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable<$ExpensesTable, Expense>(table), $$ExpensesTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: ({bankEventId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (bankEventId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.bankEventId,
+                                referencedTable: $$ExpensesTableReferences._bankEventIdTable(db),
+                                referencedColumn: $$ExpensesTableReferences._bankEventIdTable(db).id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ExpensesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$EriDb,
+      $ExpensesTable,
+      Expense,
+      $$ExpensesTableFilterComposer,
+      $$ExpensesTableOrderingComposer,
+      $$ExpensesTableAnnotationComposer,
+      $$ExpensesTableCreateCompanionBuilder,
+      $$ExpensesTableUpdateCompanionBuilder,
+      (Expense, $$ExpensesTableReferences),
+      Expense,
+      PrefetchHooks Function({bool bankEventId})
+    >;
+typedef $$PaymentClaimsTableCreateCompanionBuilder =
+    PaymentClaimsCompanion Function({
+      Value<int> id,
+      required String app,
+      required String sender,
+      Value<int?> amountKobo,
+      Value<String?> preview,
+      required String previewHash,
+      required DateTime claimedAt,
+      required DateTime expiresAt,
+      required String status,
+      Value<int?> bankEventId,
+      Value<bool> dismissed,
+    });
+typedef $$PaymentClaimsTableUpdateCompanionBuilder =
+    PaymentClaimsCompanion Function({
+      Value<int> id,
+      Value<String> app,
+      Value<String> sender,
+      Value<int?> amountKobo,
+      Value<String?> preview,
+      Value<String> previewHash,
+      Value<DateTime> claimedAt,
+      Value<DateTime> expiresAt,
+      Value<String> status,
+      Value<int?> bankEventId,
+      Value<bool> dismissed,
+    });
+
+final class $$PaymentClaimsTableReferences extends BaseReferences<_$EriDb, $PaymentClaimsTable, PaymentClaim> {
+  $$PaymentClaimsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $BankEventsTable _bankEventIdTable(_$EriDb db) =>
+      db.bankEvents.createAlias('payment_claims__bank_event_id__bank_events__id');
+
+  $$BankEventsTableProcessedTableManager? get bankEventId {
+    final $_column = $_itemColumn<int>('bank_event_id');
+    if ($_column == null) return null;
+    final manager = $$BankEventsTableTableManager($_db, $_db.bankEvents).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_bankEventIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$PaymentClaimsTableFilterComposer extends Composer<_$EriDb, $PaymentClaimsTable> {
+  $$PaymentClaimsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get app => $composableBuilder(column: $table.app, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sender =>
+      $composableBuilder(column: $table.sender, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountKobo =>
+      $composableBuilder(column: $table.amountKobo, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get preview =>
+      $composableBuilder(column: $table.preview, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get previewHash =>
+      $composableBuilder(column: $table.previewHash, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get claimedAt =>
+      $composableBuilder(column: $table.claimedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get dismissed =>
+      $composableBuilder(column: $table.dismissed, builder: (column) => ColumnFilters(column));
+
+  $$BankEventsTableFilterComposer get bankEventId {
+    final $$BankEventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableFilterComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PaymentClaimsTableOrderingComposer extends Composer<_$EriDb, $PaymentClaimsTable> {
+  $$PaymentClaimsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get app =>
+      $composableBuilder(column: $table.app, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sender =>
+      $composableBuilder(column: $table.sender, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get amountKobo =>
+      $composableBuilder(column: $table.amountKobo, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get preview =>
+      $composableBuilder(column: $table.preview, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get previewHash =>
+      $composableBuilder(column: $table.previewHash, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get claimedAt =>
+      $composableBuilder(column: $table.claimedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get dismissed =>
+      $composableBuilder(column: $table.dismissed, builder: (column) => ColumnOrderings(column));
+
+  $$BankEventsTableOrderingComposer get bankEventId {
+    final $$BankEventsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableOrderingComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PaymentClaimsTableAnnotationComposer extends Composer<_$EriDb, $PaymentClaimsTable> {
+  $$PaymentClaimsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get app => $composableBuilder(column: $table.app, builder: (column) => column);
+
+  GeneratedColumn<String> get sender => $composableBuilder(column: $table.sender, builder: (column) => column);
+
+  GeneratedColumn<int> get amountKobo => $composableBuilder(column: $table.amountKobo, builder: (column) => column);
+
+  GeneratedColumn<String> get preview => $composableBuilder(column: $table.preview, builder: (column) => column);
+
+  GeneratedColumn<String> get previewHash =>
+      $composableBuilder(column: $table.previewHash, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get claimedAt => $composableBuilder(column: $table.claimedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiresAt => $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumn<String> get status => $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<bool> get dismissed => $composableBuilder(column: $table.dismissed, builder: (column) => column);
+
+  $$BankEventsTableAnnotationComposer get bankEventId {
+    final $$BankEventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PaymentClaimsTableTableManager
+    extends
+        RootTableManager<
+          _$EriDb,
+          $PaymentClaimsTable,
+          PaymentClaim,
+          $$PaymentClaimsTableFilterComposer,
+          $$PaymentClaimsTableOrderingComposer,
+          $$PaymentClaimsTableAnnotationComposer,
+          $$PaymentClaimsTableCreateCompanionBuilder,
+          $$PaymentClaimsTableUpdateCompanionBuilder,
+          (PaymentClaim, $$PaymentClaimsTableReferences),
+          PaymentClaim,
+          PrefetchHooks Function({bool bankEventId})
+        > {
+  $$PaymentClaimsTableTableManager(_$EriDb db, $PaymentClaimsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$PaymentClaimsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PaymentClaimsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PaymentClaimsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> app = const Value.absent(),
+                Value<String> sender = const Value.absent(),
+                Value<int?> amountKobo = const Value.absent(),
+                Value<String?> preview = const Value.absent(),
+                Value<String> previewHash = const Value.absent(),
+                Value<DateTime> claimedAt = const Value.absent(),
+                Value<DateTime> expiresAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int?> bankEventId = const Value.absent(),
+                Value<bool> dismissed = const Value.absent(),
+              }) => PaymentClaimsCompanion(
+                id: id,
+                app: app,
+                sender: sender,
+                amountKobo: amountKobo,
+                preview: preview,
+                previewHash: previewHash,
+                claimedAt: claimedAt,
+                expiresAt: expiresAt,
+                status: status,
+                bankEventId: bankEventId,
+                dismissed: dismissed,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String app,
+                required String sender,
+                Value<int?> amountKobo = const Value.absent(),
+                Value<String?> preview = const Value.absent(),
+                required String previewHash,
+                required DateTime claimedAt,
+                required DateTime expiresAt,
+                required String status,
+                Value<int?> bankEventId = const Value.absent(),
+                Value<bool> dismissed = const Value.absent(),
+              }) => PaymentClaimsCompanion.insert(
+                id: id,
+                app: app,
+                sender: sender,
+                amountKobo: amountKobo,
+                preview: preview,
+                previewHash: previewHash,
+                claimedAt: claimedAt,
+                expiresAt: expiresAt,
+                status: status,
+                bankEventId: bankEventId,
+                dismissed: dismissed,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PaymentClaimsTable, PaymentClaim>(table),
+                  $$PaymentClaimsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({bankEventId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (bankEventId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.bankEventId,
+                                referencedTable: $$PaymentClaimsTableReferences._bankEventIdTable(db),
+                                referencedColumn: $$PaymentClaimsTableReferences._bankEventIdTable(db).id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PaymentClaimsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$EriDb,
+      $PaymentClaimsTable,
+      PaymentClaim,
+      $$PaymentClaimsTableFilterComposer,
+      $$PaymentClaimsTableOrderingComposer,
+      $$PaymentClaimsTableAnnotationComposer,
+      $$PaymentClaimsTableCreateCompanionBuilder,
+      $$PaymentClaimsTableUpdateCompanionBuilder,
+      (PaymentClaim, $$PaymentClaimsTableReferences),
+      PaymentClaim,
+      PrefetchHooks Function({bool bankEventId})
+    >;
+typedef $$ReceiptChecksTableCreateCompanionBuilder =
+    ReceiptChecksCompanion Function({
+      Value<int> id,
+      Value<int?> amountKobo,
+      Value<String?> sender,
+      Value<String?> bank,
+      Value<DateTime?> receiptTime,
+      required String verdict,
+      required String reasons,
+      Value<int?> bankEventId,
+      Value<String?> imageHash,
+      Value<DateTime> checkedAt,
+    });
+typedef $$ReceiptChecksTableUpdateCompanionBuilder =
+    ReceiptChecksCompanion Function({
+      Value<int> id,
+      Value<int?> amountKobo,
+      Value<String?> sender,
+      Value<String?> bank,
+      Value<DateTime?> receiptTime,
+      Value<String> verdict,
+      Value<String> reasons,
+      Value<int?> bankEventId,
+      Value<String?> imageHash,
+      Value<DateTime> checkedAt,
+    });
+
+final class $$ReceiptChecksTableReferences extends BaseReferences<_$EriDb, $ReceiptChecksTable, ReceiptCheck> {
+  $$ReceiptChecksTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $BankEventsTable _bankEventIdTable(_$EriDb db) =>
+      db.bankEvents.createAlias('receipt_checks__bank_event_id__bank_events__id');
+
+  $$BankEventsTableProcessedTableManager? get bankEventId {
+    final $_column = $_itemColumn<int>('bank_event_id');
+    if ($_column == null) return null;
+    final manager = $$BankEventsTableTableManager($_db, $_db.bankEvents).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_bankEventIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$ReceiptChecksTableFilterComposer extends Composer<_$EriDb, $ReceiptChecksTable> {
+  $$ReceiptChecksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountKobo =>
+      $composableBuilder(column: $table.amountKobo, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sender =>
+      $composableBuilder(column: $table.sender, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get bank => $composableBuilder(column: $table.bank, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get receiptTime =>
+      $composableBuilder(column: $table.receiptTime, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get verdict =>
+      $composableBuilder(column: $table.verdict, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get reasons =>
+      $composableBuilder(column: $table.reasons, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imageHash =>
+      $composableBuilder(column: $table.imageHash, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get checkedAt =>
+      $composableBuilder(column: $table.checkedAt, builder: (column) => ColumnFilters(column));
+
+  $$BankEventsTableFilterComposer get bankEventId {
+    final $$BankEventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableFilterComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReceiptChecksTableOrderingComposer extends Composer<_$EriDb, $ReceiptChecksTable> {
+  $$ReceiptChecksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get amountKobo =>
+      $composableBuilder(column: $table.amountKobo, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sender =>
+      $composableBuilder(column: $table.sender, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get bank =>
+      $composableBuilder(column: $table.bank, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get receiptTime =>
+      $composableBuilder(column: $table.receiptTime, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get verdict =>
+      $composableBuilder(column: $table.verdict, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get reasons =>
+      $composableBuilder(column: $table.reasons, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imageHash =>
+      $composableBuilder(column: $table.imageHash, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get checkedAt =>
+      $composableBuilder(column: $table.checkedAt, builder: (column) => ColumnOrderings(column));
+
+  $$BankEventsTableOrderingComposer get bankEventId {
+    final $$BankEventsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableOrderingComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReceiptChecksTableAnnotationComposer extends Composer<_$EriDb, $ReceiptChecksTable> {
+  $$ReceiptChecksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get amountKobo => $composableBuilder(column: $table.amountKobo, builder: (column) => column);
+
+  GeneratedColumn<String> get sender => $composableBuilder(column: $table.sender, builder: (column) => column);
+
+  GeneratedColumn<String> get bank => $composableBuilder(column: $table.bank, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get receiptTime =>
+      $composableBuilder(column: $table.receiptTime, builder: (column) => column);
+
+  GeneratedColumn<String> get verdict => $composableBuilder(column: $table.verdict, builder: (column) => column);
+
+  GeneratedColumn<String> get reasons => $composableBuilder(column: $table.reasons, builder: (column) => column);
+
+  GeneratedColumn<String> get imageHash => $composableBuilder(column: $table.imageHash, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get checkedAt => $composableBuilder(column: $table.checkedAt, builder: (column) => column);
+
+  $$BankEventsTableAnnotationComposer get bankEventId {
+    final $$BankEventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.bankEventId,
+      referencedTable: $db.bankEvents,
+      getReferencedColumn: (t) => t.id,
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
+          $$BankEventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.bankEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReceiptChecksTableTableManager
+    extends
+        RootTableManager<
+          _$EriDb,
+          $ReceiptChecksTable,
+          ReceiptCheck,
+          $$ReceiptChecksTableFilterComposer,
+          $$ReceiptChecksTableOrderingComposer,
+          $$ReceiptChecksTableAnnotationComposer,
+          $$ReceiptChecksTableCreateCompanionBuilder,
+          $$ReceiptChecksTableUpdateCompanionBuilder,
+          (ReceiptCheck, $$ReceiptChecksTableReferences),
+          ReceiptCheck,
+          PrefetchHooks Function({bool bankEventId})
+        > {
+  $$ReceiptChecksTableTableManager(_$EriDb db, $ReceiptChecksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$ReceiptChecksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ReceiptChecksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ReceiptChecksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> amountKobo = const Value.absent(),
+                Value<String?> sender = const Value.absent(),
+                Value<String?> bank = const Value.absent(),
+                Value<DateTime?> receiptTime = const Value.absent(),
+                Value<String> verdict = const Value.absent(),
+                Value<String> reasons = const Value.absent(),
+                Value<int?> bankEventId = const Value.absent(),
+                Value<String?> imageHash = const Value.absent(),
+                Value<DateTime> checkedAt = const Value.absent(),
+              }) => ReceiptChecksCompanion(
+                id: id,
+                amountKobo: amountKobo,
+                sender: sender,
+                bank: bank,
+                receiptTime: receiptTime,
+                verdict: verdict,
+                reasons: reasons,
+                bankEventId: bankEventId,
+                imageHash: imageHash,
+                checkedAt: checkedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> amountKobo = const Value.absent(),
+                Value<String?> sender = const Value.absent(),
+                Value<String?> bank = const Value.absent(),
+                Value<DateTime?> receiptTime = const Value.absent(),
+                required String verdict,
+                required String reasons,
+                Value<int?> bankEventId = const Value.absent(),
+                Value<String?> imageHash = const Value.absent(),
+                Value<DateTime> checkedAt = const Value.absent(),
+              }) => ReceiptChecksCompanion.insert(
+                id: id,
+                amountKobo: amountKobo,
+                sender: sender,
+                bank: bank,
+                receiptTime: receiptTime,
+                verdict: verdict,
+                reasons: reasons,
+                bankEventId: bankEventId,
+                imageHash: imageHash,
+                checkedAt: checkedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ReceiptChecksTable, ReceiptCheck>(table),
+                  $$ReceiptChecksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({bankEventId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (bankEventId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.bankEventId,
+                                referencedTable: $$ReceiptChecksTableReferences._bankEventIdTable(db),
+                                referencedColumn: $$ReceiptChecksTableReferences._bankEventIdTable(db).id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ReceiptChecksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$EriDb,
+      $ReceiptChecksTable,
+      ReceiptCheck,
+      $$ReceiptChecksTableFilterComposer,
+      $$ReceiptChecksTableOrderingComposer,
+      $$ReceiptChecksTableAnnotationComposer,
+      $$ReceiptChecksTableCreateCompanionBuilder,
+      $$ReceiptChecksTableUpdateCompanionBuilder,
+      (ReceiptCheck, $$ReceiptChecksTableReferences),
+      ReceiptCheck,
+      PrefetchHooks Function({bool bankEventId})
+    >;
 
 class $EriDbManager {
   final _$EriDb _db;
@@ -5398,4 +7799,7 @@ class $EriDbManager {
   $$OrderItemsTableTableManager get orderItems => $$OrderItemsTableTableManager(_db, _db.orderItems);
   $$MatchesTableTableManager get matches => $$MatchesTableTableManager(_db, _db.matches);
   $$IgnoreRulesTableTableManager get ignoreRules => $$IgnoreRulesTableTableManager(_db, _db.ignoreRules);
+  $$ExpensesTableTableManager get expenses => $$ExpensesTableTableManager(_db, _db.expenses);
+  $$PaymentClaimsTableTableManager get paymentClaims => $$PaymentClaimsTableTableManager(_db, _db.paymentClaims);
+  $$ReceiptChecksTableTableManager get receiptChecks => $$ReceiptChecksTableTableManager(_db, _db.receiptChecks);
 }

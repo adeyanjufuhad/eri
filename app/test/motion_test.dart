@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _host(Widget child, {bool reduce = false}) => MediaQuery(
-      data: MediaQueryData(disableAnimations: reduce),
-      child: Directionality(textDirection: TextDirection.ltr, child: Center(child: child)),
-    );
+  data: MediaQueryData(disableAnimations: reduce),
+  child: Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  ),
+);
 
 void main() {
   testWidgets('money counts up to the new amount with ease-out', (tester) async {
@@ -43,10 +46,16 @@ void main() {
   });
 
   testWidgets('enter finishes fully visible, with and without a delay', (tester) async {
-    await tester.pumpWidget(_host(const Column(children: [
-      EnterOnce(child: Text('a')),
-      EnterOnce(delay: Duration(milliseconds: 120), child: Text('b')),
-    ])));
+    await tester.pumpWidget(
+      _host(
+        const Column(
+          children: [
+            EnterOnce(child: Text('a')),
+            EnterOnce(delay: Duration(milliseconds: 120), child: Text('b')),
+          ],
+        ),
+      ),
+    );
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
     for (final o in tester.widgetList<Opacity>(find.byType(Opacity))) {

@@ -18,13 +18,24 @@ void main() {
   tearDown(() => db.close());
 
   final t = DateTime(2026, 11, 24, 14, 14);
-  p.RawNotification alert(String text) => p.RawNotification(package: 'team.opay.pay', title: 'OPay', text: text, postedAt: t);
+  p.RawNotification alert(String text) =>
+      p.RawNotification(package: 'team.opay.pay', title: 'OPay', text: text, postedAt: t);
 
   Future<Product> product(int id) => (db.select(db.products)..where((x) => x.id.equals(id))).getSingle();
-  Future<BankEvent> lastEvent() => (db.select(db.bankEvents)..orderBy([(x) => OrderingTerm.desc(x.id)])..limit(1)).getSingle();
+  Future<BankEvent> lastEvent() =>
+      (db.select(db.bankEvents)
+            ..orderBy([(x) => OrderingTerm.desc(x.id)])
+            ..limit(1))
+          .getSingle();
 
   test('Day 2 exit check: ₦25,000 "ankara gown" → Sold, +₦7,500, 3 left, zero taps', () async {
-    final gown = await sales.addProduct(name: 'Ankara Gown', aliases: 'gown', sellPriceKobo: 2500000, costKobo: 1750000, qty: 4);
+    final gown = await sales.addProduct(
+      name: 'Ankara Gown',
+      aliases: 'gown',
+      sellPriceKobo: 2500000,
+      costKobo: 1750000,
+      qty: 4,
+    );
 
     await ingest(db, [alert('You have received ₦25,000.00 from CHIOMA OKAFOR. Narration: ankara gown')], sales: sales);
 
@@ -33,7 +44,10 @@ void main() {
     expect(order.status, 'paid');
     expect(order.customerName, 'CHIOMA OKAFOR');
     final items = await db.select(db.orderItems).get();
-    expect(grossProfit(items.map((i) => (qty: i.qty, unitPriceKobo: i.unitPriceKobo, unitCostKobo: i.unitCostKobo))), 750000);
+    expect(
+      grossProfit(items.map((i) => (qty: i.qty, unitPriceKobo: i.unitPriceKobo, unitCostKobo: i.unitCostKobo))),
+      750000,
+    );
     final match = await db.select(db.matches).getSingle();
     expect(match.kind, 'narration');
     expect(match.confirmedByUser, isFalse);

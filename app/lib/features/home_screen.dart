@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:eri/core/money.dart';
 import 'package:eri/core/time.dart';
 import 'package:eri/data/db.dart';
+import 'package:eri/features/claims_widgets.dart';
 import 'package:eri/features/widgets.dart';
 import 'package:eri/matching/matcher.dart';
 import 'package:eri/providers.dart';
@@ -25,6 +26,16 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('eri'),
         actions: [
+          IconButton(
+            tooltip: 'Check a receipt',
+            icon: const Icon(Icons.fact_check_outlined),
+            onPressed: () => context.push('/receipt'),
+          ),
+          IconButton(
+            tooltip: 'Settings',
+            icon: const Icon(Icons.tune),
+            onPressed: () => showEriSheet<void>(context, (_) => const SettingsSheet()),
+          ),
           IconButton(
             tooltip: 'Alert log (on this phone)',
             icon: const Icon(Icons.receipt_long_outlined),
@@ -55,8 +66,18 @@ class HomeScreen extends ConsumerWidget {
                       color: v.landed.withValues(alpha: 0.12),
                       textColor: v.landed,
                     ),
-                    Pill('Out ${naira(books.moneyOutKobo)}'),
+                    Pill('Spent ${naira(books.spentKobo)}'),
                   ],
+                ),
+                const SizedBox(height: 10),
+                // net = profit on what sold − business expenses (debits), so the vendor sees the real day
+                Text(
+                  'Net today ${naira(books.netKobo)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: tabular,
+                    color: books.netKobo < 0 ? v.notReceived : EriColors.foreground,
+                  ),
                 ),
               ],
             ),
@@ -75,6 +96,18 @@ class HomeScreen extends ConsumerWidget {
                   ),
               ],
             ),
+          ],
+          // "I've paid" claims first: a fake one costs the vendor the goods
+          if (books.claims.isNotEmpty) ...[
+            SectionLabel('Payment claims (${books.claims.length})'),
+            for (final c in books.claims) ...[
+              EnterOnce(
+                key: ValueKey('claim-${c.id}-${c.status}'),
+                animate: justNow(c.claimedAt) || c.status != 'pending',
+                child: ClaimCard(c),
+              ),
+              const SizedBox(height: 10),
+            ],
           ],
           if (books.needsYou.isNotEmpty) ...[
             SectionLabel('Needs you (${books.needsYou.length})'),
@@ -108,7 +141,14 @@ class HomeScreen extends ConsumerWidget {
                       child: EventTile(
                         e,
                         label: books.labels[e.id],
-                        onReopen: books.labels[e.id] == null ? null : () => _reopen(context, ref, e),
+                        onReopen: switch (books.labels[e.id]) {
+                          null => null,
+                          final EventLabel l when l.expense != null => () => showEriSheet<void>(
+                            context,
+                            (_) => ExpenseSheet(e, l.expense!),
+                          ),
+                          _ => () => _reopen(context, ref, e),
+                        },
                       ),
                     ),
                   ],

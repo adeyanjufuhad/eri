@@ -1,6 +1,7 @@
 package app.eri.eri
 
 import android.app.Notification
+import android.content.Context
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import io.flutter.plugin.common.EventChannel
@@ -13,7 +14,8 @@ import java.io.File
  *
  * Privacy: nothing here touches the network. Kept notifications go into a small queue file in the app's
  * private storage; the Flutter side drains it, parses it on the device and stores it in SQLite.
- * Chat apps (WhatsApp, Instagram) are skipped until the opt-in chat check exists (Day 3).
+ * Chat apps (WhatsApp, Instagram) are read ONLY when the vendor turns on chat checks, and only previews that
+ * mention paying are kept (everything else is dropped here, before it touches storage).
  *
  * Every kept notification is queued, even when the Flutter UI isn't running, so no alert is lost.
  * When the UI is listening, it also gets a ping to drain straight away.
@@ -24,7 +26,8 @@ class EriNotificationListener : NotificationListenerService() {
         if (sbn.packageName == packageName) return
         val n = sbn.notification ?: return
         if (n.flags and Notification.FLAG_GROUP_SUMMARY != 0) return
-        if (sbn.packageName in CHAT_APPS) return
+        val chat = sbn.packageName in CHAT_APPS
+        if (chat && !chatChecksOn(applicationContext)) return
 
         val extras = n.extras
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
@@ -33,8 +36,12 @@ class EriNotificationListener : NotificationListenerService() {
             ?: extras.getCharSequence(Notification.EXTRA_TEXT))?.toString().orEmpty()
         if (text.isBlank()) return
 
-        val known = sbn.packageName in BANK_APPS
-        if (!known && !MONEY.containsMatchIn("$title $text")) return
+        if (chat) {
+            if (!PAID_HINT.containsMatchIn(text)) return
+        } else {
+            val known = sbn.packageName in BANK_APPS
+            if (!known && !MONEY.containsMatchIn("$title $text")) return
+        }
 
         val item = JSONObject()
             .put("package", sbn.packageName)
@@ -70,12 +77,20 @@ class EriNotificationListener : NotificationListenerService() {
             "com.accessbank.accessmobile",
         )
 
-        private val CHAT_APPS = setOf(
-            "com.whatsapp",
-            "com.whatsapp.w4b",
-            "com.instagram.android",
-            "org.telegram.messenger",
-        )
+        // Keep in sync with chatApps in lib/claims/claims.dart. Telegram etc. are never read.
+        private val CHAT_APPS = setOf("com.whatsapp", "com.whatsapp.w4b", "com.instagram.android")
+
+        // loose first pass for chat previews; lib/claims/claims.dart decides properly
+        private val PAID_HINT = Regex("""\b(paid|pay|sent|send|transfer|transferred|alert|account|acct|payment)\b""", RegexOption.IGNORE_CASE)
+
+        private const val PREFS = "eri"
+        private const val CHAT_KEY = "chat_checks"
+
+        fun chatChecksOn(ctx: Context): Boolean =
+            ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(CHAT_KEY, false)
+
+        fun setChatChecks(ctx: Context, on: Boolean) =
+            ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(CHAT_KEY, on).apply()
 
         fun enqueue(dir: File, item: JSONObject) = synchronized(lock) {
             File(dir, QUEUE).appendText(item.toString() + "\n")

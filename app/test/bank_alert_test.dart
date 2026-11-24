@@ -26,9 +26,11 @@ void main() {
 
   group('credits', () {
     test('GTBank SMS: skips the balance, reads sender and note', () {
-      final a = parseAlert(n(
-        'GTBank: Acct 01******89 Cr NGN25,000.00\nfrom CHIOMA OKAFOR Desc: ankara gown\nAvail Bal: NGN412,300.00  21-Nov-26 14:14',
-      ))!;
+      final a = parseAlert(
+        n(
+          'GTBank: Acct 01******89 Cr NGN25,000.00\nfrom CHIOMA OKAFOR Desc: ankara gown\nAvail Bal: NGN412,300.00  21-Nov-26 14:14',
+        ),
+      )!;
       expect(a.bank, 'GTBank');
       expect(a.direction, Direction.credit);
       expect(a.amountKobo, 2500000);
@@ -39,15 +41,21 @@ void main() {
     });
 
     test('GTBank labelled SMS: Amt line, balance first is ignored', () {
-      final a = parseAlert(n('Acct: 01******89\nAvail Bal: NGN412,300.00\nAmt: NGN25,000.00 CR\nDesc: CHIOMA OKAFOR/ankara gown',
-          title: 'GTBank'))!;
+      final a = parseAlert(
+        n(
+          'Acct: 01******89\nAvail Bal: NGN412,300.00\nAmt: NGN25,000.00 CR\nDesc: CHIOMA OKAFOR/ankara gown',
+          title: 'GTBank',
+        ),
+      )!;
       expect(a.amountKobo, 2500000);
       expect(a.direction, Direction.credit);
       expect(a.narration, 'CHIOMA OKAFOR/ankara gown');
     });
 
     test('OPay push: bank from the package', () {
-      final a = parseAlert(n('You have received ₦8,500.00 from FEMI ADEYEMI.', title: 'Transfer received', package: 'team.opay.pay'))!;
+      final a = parseAlert(
+        n('You have received ₦8,500.00 from FEMI ADEYEMI.', title: 'Transfer received', package: 'team.opay.pay'),
+      )!;
       expect(a.bank, 'OPay');
       expect(a.amountKobo, 850000);
       expect(a.counterparty, 'FEMI ADEYEMI');
@@ -62,7 +70,9 @@ void main() {
     });
 
     test('Kuda: quoted note after a dash', () {
-      final a = parseAlert(n('You just got ₦12,000 from Bola Sanni - “aso-oke cap”', title: 'Money in!', package: 'com.kudabank.app'))!;
+      final a = parseAlert(
+        n('You just got ₦12,000 from Bola Sanni - “aso-oke cap”', title: 'Money in!', package: 'com.kudabank.app'),
+      )!;
       expect(a.bank, 'Kuda');
       expect(a.amountKobo, 1200000);
       expect(a.counterparty, 'Bola Sanni');
@@ -70,7 +80,9 @@ void main() {
     });
 
     test('session ID when present', () {
-      final a = parseAlert(n('Credit Alert! NGN 45,000.00 from TUNDE BAKARE. Session ID: 090405261121141402987654321012'))!;
+      final a = parseAlert(
+        n('Credit Alert! NGN 45,000.00 from TUNDE BAKARE. Session ID: 090405261121141402987654321012'),
+      )!;
       expect(a.sessionId, '090405261121141402987654321012');
       expect(a.counterparty, 'TUNDE BAKARE');
     });
@@ -85,8 +97,12 @@ void main() {
 
   group('debits', () {
     test('GTBank DR is an expense', () {
-      final a = parseAlert(n('Acct: 01******89\nAmt: NGN3,500.00 DR\nDesc: POS PURCHASE DISPATCH RIDER\nAvail Bal: NGN408,800.00',
-          title: 'GTBank'))!;
+      final a = parseAlert(
+        n(
+          'Acct: 01******89\nAmt: NGN3,500.00 DR\nDesc: POS PURCHASE DISPATCH RIDER\nAvail Bal: NGN408,800.00',
+          title: 'GTBank',
+        ),
+      )!;
       expect(a.direction, Direction.debit);
       expect(a.amountKobo, 350000);
     });

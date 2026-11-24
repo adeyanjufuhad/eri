@@ -8,9 +8,20 @@ const adire = MProduct(id: 2, name: 'Adire Two-piece', aliases: ['adire set'], p
 const cap = MProduct(id: 3, name: 'Aso-oke Cap', priceKobo: 850000, qty: 9);
 const catalogue = [gown, adire, cap];
 
-MatchOutcome m(int kobo, {String? from, String? note, List<MOrder> orders = const [], Set<String> ignore = const {}, int fee = 0}) =>
-    matchCredit(MEvent(amountKobo: kobo, counterparty: from, narration: note),
-        products: catalogue, openOrders: orders, ignoredSenders: ignore, deliveryFeeKobo: fee);
+MatchOutcome m(
+  int kobo, {
+  String? from,
+  String? note,
+  List<MOrder> orders = const [],
+  Set<String> ignore = const {},
+  int fee = 0,
+}) => matchCredit(
+  MEvent(amountKobo: kobo, counterparty: from, narration: note),
+  products: catalogue,
+  openOrders: orders,
+  ignoredSenders: ignore,
+  deliveryFeeKobo: fee,
+);
 
 void main() {
   group('text', () {
@@ -34,7 +45,13 @@ void main() {
     });
 
     test('order code wins, even with no product words', () {
-      const o = MOrder(id: 7, code: 'ERI-104', expectedKobo: 3350000, customer: 'Amaka Eze', lines: [SaleLine(2, 1), SaleLine(3, 1)]);
+      const o = MOrder(
+        id: 7,
+        code: 'ERI-104',
+        expectedKobo: 3350000,
+        customer: 'Amaka Eze',
+        lines: [SaleLine(2, 1), SaleLine(3, 1)],
+      );
       final a = m(3350000, from: 'AMAKA EZE', note: 'eri 104', orders: [o]).auto!;
       expect(a.kind, MatchKind.orderCode);
       expect(a.orderId, 7);
@@ -48,7 +65,13 @@ void main() {
     });
 
     test('expected payment: exact amount and the right name', () {
-      const o = MOrder(id: 9, code: 'ERI-120', expectedKobo: 4500000, customer: 'Tunde Bakare', lines: [SaleLine(1, 1)]);
+      const o = MOrder(
+        id: 9,
+        code: 'ERI-120',
+        expectedKobo: 4500000,
+        customer: 'Tunde Bakare',
+        lines: [SaleLine(1, 1)],
+      );
       final a = m(4500000, from: 'TUNDE BAKARE', orders: [o]).auto!;
       expect(a.kind, MatchKind.expectedPayment);
       expect(a.orderId, 9);
@@ -95,8 +118,13 @@ void main() {
 
     test('ambiguous amount → ask with every option', () {
       // two products at the same price: the amount can't tell them apart
-      final out = matchCredit(const MEvent(amountKobo: 1000000),
-          products: const [MProduct(id: 1, name: 'A', priceKobo: 1000000, qty: 1), MProduct(id: 2, name: 'B', priceKobo: 1000000, qty: 1)]);
+      final out = matchCredit(
+        const MEvent(amountKobo: 1000000),
+        products: const [
+          MProduct(id: 1, name: 'A', priceKobo: 1000000, qty: 1),
+          MProduct(id: 2, name: 'B', priceKobo: 1000000, qty: 1),
+        ],
+      );
       expect(out.auto, isNull);
       expect(out.proposals, hasLength(2));
     });

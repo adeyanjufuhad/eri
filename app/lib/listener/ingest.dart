@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
+import 'package:eri/claims/claim_service.dart';
+import 'package:eri/claims/claims.dart' show chatApps;
 import 'package:eri/data/db.dart';
 import 'package:eri/matching/sales.dart';
 import 'package:eri/parsing/bank_alert.dart' as p;
@@ -11,11 +13,16 @@ String rawHash(p.RawNotification n) => sha256.convert(utf8.encode('${n.package}\
 
 /// Stores each raw notification (on the phone only), parses it, and stores the bank event if it is one.
 /// Each new credit then goes through the matching engine (sale logged with zero taps when it's sure).
-/// Returns how many new bank events were added.
-Future<int> ingest(EriDb db, Iterable<p.RawNotification> items, {Sales? sales}) async {
+/// Debits become expenses. Chat previews (opt-in) never enter the alert log: they go to the claims check,
+/// which keeps only "I've paid" messages. Returns how many new bank events were added.
+Future<int> ingest(EriDb db, Iterable<p.RawNotification> items, {Sales? sales, Claims? claims}) async {
   final added = <int>[];
+  final chats = items.where((n) => chatApps.containsKey(n.package)).toList();
+  final alerts = items.where((n) => !chatApps.containsKey(n.package));
+  final c = claims ?? Claims(db);
+  await c.ingestChat(chats);
   await db.transaction(() async {
-    for (final n in items) {
+    for (final n in alerts) {
       final hash = rawHash(n);
       final alert = p.parseAlert(n);
       // insertReturningOrNull gives null when the hash is already stored (insert() would return the last rowid)
@@ -55,6 +62,8 @@ Future<int> ingest(EriDb db, Iterable<p.RawNotification> items, {Sales? sales}) 
   final s = sales ?? Sales(db);
   for (final id in added) {
     await s.autoMatch(id);
+    await s.autoExpense(id);
   }
+  if (added.isNotEmpty || chats.isNotEmpty) await c.resolve();
   return added.length;
 }

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:eri/data/db.dart';
 import 'package:eri/matching/costing.dart';
+import 'package:eri/matching/expenses.dart';
 import 'package:eri/matching/matcher.dart';
 import 'package:eri/matching/text_match.dart';
 
@@ -175,6 +176,42 @@ class Sales {
       await (db.delete(db.orders)..where((t) => t.id.equals(orderId))).go();
     }
   });
+
+  // ── expenses (debits) ────────────────────────────────────────────────────
+
+  /// Every debit becomes an expense on arrival, classified by keywords or by what the vendor chose for the
+  /// same recipient before.
+  Future<void> autoExpense(int bankEventId) async {
+    final e = await (db.select(db.bankEvents)..where((t) => t.id.equals(bankEventId))).getSingleOrNull();
+    if (e == null || e.direction != 'debit') return;
+    final remembered = <String, ExpenseCategory>{};
+    final rows = await (db.select(db.expenses).join([
+      innerJoin(db.bankEvents, db.bankEvents.id.equalsExp(db.expenses.bankEventId)),
+    ])..where(db.expenses.setByUser.equals(true))).get();
+    for (final r in rows) {
+      final who = r.readTable(db.bankEvents).counterparty;
+      if (who != null) remembered[normalize(who)] = ExpenseCategory.fromName(r.readTable(db.expenses).category);
+    }
+    await db
+        .into(db.expenses)
+        .insert(
+          ExpensesCompanion.insert(
+            bankEventId: e.id,
+            category: classifyDebit(counterparty: e.counterparty, narration: e.narration, remembered: remembered).name,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+  }
+
+  Future<void> setExpenseCategory(int bankEventId, ExpenseCategory c) => db
+      .into(db.expenses)
+      .insert(
+        ExpensesCompanion.insert(bankEventId: bankEventId, category: c.name, setByUser: const Value(true)),
+        onConflict: DoUpdate(
+          (_) => ExpensesCompanion(category: Value(c.name), setByUser: const Value(true)),
+          target: [db.expenses.bankEventId],
+        ),
+      );
 
   // ── products and stock ───────────────────────────────────────────────────
 

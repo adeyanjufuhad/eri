@@ -20,6 +20,16 @@ class NotificationBridge {
     if (!kIsWeb) await _methods.invokeMethod<void>('openPermissionSettings');
   }
 
+  /// Opt-in "I've paid" checks on WhatsApp / Instagram previews. Stored natively so the listener can read it.
+  Future<bool> chatChecks() async {
+    if (kIsWeb) return false;
+    return await _methods.invokeMethod<bool>('getChatChecks').catchError((_) => false) ?? false;
+  }
+
+  Future<void> setChatChecks(bool on) async {
+    if (!kIsWeb) await _methods.invokeMethod<void>('setChatChecks', on);
+  }
+
   /// Fires whenever the listener queues something while the app is open.
   Stream<void> get pings => kIsWeb ? const Stream.empty() : _ping.receiveBroadcastStream().map((_) {});
 

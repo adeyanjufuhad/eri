@@ -3,9 +3,12 @@ import 'package:eri/core/money.dart';
 import 'package:eri/core/time.dart';
 import 'package:eri/data/db.dart';
 import 'package:eri/listener/notification_bridge.dart';
+import 'package:eri/claims/claim_service.dart';
 import 'package:eri/matching/costing.dart';
+import 'package:eri/matching/expenses.dart';
 import 'package:eri/matching/matcher.dart';
 import 'package:eri/matching/sales.dart';
+import 'package:eri/receipts/receipt_service.dart';
 
 final dbProvider = Provider<EriDb>((ref) {
   final db = EriDb();
@@ -16,6 +19,14 @@ final dbProvider = Provider<EriDb>((ref) {
 final bridgeProvider = Provider<NotificationBridge>((_) => NotificationBridge());
 
 final salesProvider = Provider<Sales>((ref) => Sales(ref.watch(dbProvider)));
+final claimsProvider = Provider<Claims>((ref) => Claims(ref.watch(dbProvider)));
+final receiptsProvider = Provider<Receipts>((ref) => Receipts(ref.watch(dbProvider)));
+
+final expensesProvider = StreamProvider<List<Expense>>((ref) => ref.watch(dbProvider).watchExpenses());
+final claimListProvider = StreamProvider<List<PaymentClaim>>((ref) => ref.watch(dbProvider).watchClaims());
+
+/// Opt-in "I've paid" checks (stored natively so the listener can read it).
+final chatChecksProvider = FutureProvider<bool>((ref) => ref.watch(bridgeProvider).chatChecks());
 
 /// Re-checked whenever the app comes back to the front (the user may have just granted it in Settings).
 final permissionProvider = FutureProvider<bool>((ref) => ref.watch(bridgeProvider).isPermissionGranted());
@@ -41,9 +52,10 @@ final suggestionsProvider = FutureProvider.family<MatchOutcome, int>((ref, event
 /// One line per bank event for the feed: "Sold: Ankara Gown · +₦7,500 · 3 left", "Not a sale", or null
 /// (still undecided).
 class EventLabel {
-  const EventLabel(this.text, {this.sale = false});
+  const EventLabel(this.text, {this.sale = false, this.expense});
   final String text;
   final bool sale;
+  final ExpenseCategory? expense; // set for debits: tap to change the category
 }
 
 class Books {
@@ -55,9 +67,18 @@ class Books {
     required this.needsYou,
     required this.labels,
     required this.lowStock,
+    required this.spentKobo,
+    required this.claims,
   });
 
   final int moneyInKobo, moneyOutKobo, salesCount, profitKobo;
+
+  /// Business expenses today (debits, minus "not business").
+  final int spentKobo;
+  int get netKobo => profitKobo - spentKobo;
+
+  /// "I've paid" claims still worth showing: waiting, or the money didn't come (last 24h, not dismissed).
+  final List<PaymentClaim> claims;
   final List<BankEvent> needsYou; // credits with no decision yet (last 7 days)
   final Map<int, EventLabel> labels; // bank event id → what it became
   final List<Product> lowStock;
@@ -69,7 +90,10 @@ final booksProvider = Provider<Books>((ref) {
   final orders = ref.watch(ordersProvider).value ?? const [];
   final items = ref.watch(orderItemsProvider).value ?? const [];
   final products = ref.watch(productsProvider).value ?? const [];
+  final expenses = ref.watch(expensesProvider).value ?? const [];
+  final claims = ref.watch(claimListProvider).value ?? const [];
   final now = DateTime.now();
+  final expenseByEvent = {for (final x in expenses) x.bankEventId: ExpenseCategory.fromName(x.category)};
 
   final byId = {for (final p in products) p.id: p};
   final itemsByOrder = <int, List<OrderItem>>{};
@@ -85,6 +109,14 @@ final booksProvider = Provider<Books>((ref) {
   final matchByEvent = {for (final m in matches) m.bankEventId: m};
   final labels = <int, EventLabel>{};
   for (final e in events) {
+    final cat = expenseByEvent[e.id];
+    if (e.direction == 'debit' && cat != null) {
+      labels[e.id] = EventLabel(
+        cat == ExpenseCategory.personal ? 'Not business' : 'Expense · ${cat.label}',
+        expense: cat,
+      );
+      continue;
+    }
     final m = matchByEvent[e.id];
     if (m == null) continue;
     if (m.orderId == null) {
@@ -113,6 +145,18 @@ final booksProvider = Provider<Books>((ref) {
         if (e.direction == 'credit' && !matchByEvent.containsKey(e.id) && e.occurredAt.isAfter(weekAgo)) e,
     ],
     labels: labels,
+    spentKobo: today
+        .where(
+          (e) =>
+              e.direction == 'debit' &&
+              expenseByEvent[e.id] != null &&
+              expenseByEvent[e.id] != ExpenseCategory.personal,
+        )
+        .fold(0, (s, e) => s + e.amountKobo),
+    claims: [
+      for (final c in claims)
+        if (!c.dismissed && c.status != 'verified' && now.difference(c.claimedAt) < const Duration(hours: 24)) c,
+    ],
     lowStock: [
       for (final p in products)
         if (p.qtyOnHand <= p.lowStockThreshold) p,

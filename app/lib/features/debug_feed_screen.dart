@@ -21,6 +21,8 @@ class DebugFeedScreen extends ConsumerWidget {
     ),
     ('team.opay.pay', 'Transfer received', 'You have received ₦8,500.00 from FEMI ADEYEMI.'),
     ('com.kudabank.app', 'Money out', 'You sent ₦4,150.00 to GIG LOGISTICS.'),
+    // a chat preview: becomes an "I've paid" claim (Settings → chat checks on the phone)
+    ('com.whatsapp', 'Tunde Bakare', 'I don pay, check am 🙏 ₦45,000'),
   ];
 
   @override
@@ -64,7 +66,7 @@ class DebugFeedScreen extends ConsumerWidget {
           ? FloatingActionButton.extended(
               onPressed: () {
                 final s = _samples[DateTime.now().second % _samples.length];
-                ingest(ref.read(dbProvider), sales: ref.read(salesProvider), [
+                ingest(ref.read(dbProvider), sales: ref.read(salesProvider), claims: ref.read(claimsProvider), [
                   p.RawNotification(package: s.$1, title: s.$2, text: s.$3, postedAt: DateTime.now()),
                 ]);
               },

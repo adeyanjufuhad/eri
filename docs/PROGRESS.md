@@ -30,3 +30,12 @@
 - **Done:** motion tokens + helpers (`app/lib/theme/motion.dart`: PressScale, EnterOnce, MoneyTicker, Swap) applied across Today, Products, Orders, sheets and the welcome screen. Rules in `docs/DESIGN.md` (Flutter motion). Calmer ripple, faster tab indicator, no motion on tab switches or steppers. Reduced motion supported.
 - **Also fixed today:** Needs-you suggestions vanished after a cold start (fixed, committed); Undo for every Needs-you choice; feed rows on a Material surface so tap ripples show.
 - **Checked:** analyze clean, 48/48 tests (4 new motion tests incl. reduced motion). Browser preview checked.
+
+## Mon 23 Nov 2026 (Day 3: catching fakes)
+- **Decision (Fuhad):** receipt screenshots are read with **on-phone OCR** (Google ML Kit), not a vision model: free, offline, the image never leaves the phone. No Supabase/vision dependency.
+- **Done:**
+  - **"I don pay" claims (opt-in):** Settings switch (stored natively). The Kotlin listener reads WhatsApp / WhatsApp Business / Instagram previews only when it's on, and drops anything that doesn't mention paying before it touches storage. `app/lib/claims/claims.dart` detects claims (pidgin included; promises like "I go pay tomorrow" and questions are ignored), waits 10 minutes, then: verified quietly / ⚠ "Tunde says he paid ₦45,000. No money has arrived." / mismatch when the amount differs. Previews deleted after 24h; chat text never enters the alert log.
+  - **Receipt check:** "Check a receipt" (Today) and Share → Eri. ML Kit OCR (same-row lines merged) → `app/lib/receipts/receipt.dart` parser (amount, sender, recipient, bank, time, session ID) → verdict vs real credits: Landed / Not received / Looks edited ("₦4,500 → ₦45,000", as on the landing page) / Can't read. Stored without the image (image hash kept for Canary later).
+  - **Debits → expenses:** keyword rules (dispatch, ads, data & airtime, rent, supplier, other, not business); one-tap change, remembered per recipient. Today shows Spent and **Net today**.
+- **Checked:** analyze clean, 69/69 tests (engines + DB flows + the full-screen Day 2 test). Session-ID structure check NOT built (no confirmed format yet, per PLAN).
+- **Not done / to check on the phone:** OCR on real receipts; WhatsApp preview format for group chats; claim warnings only show in-app (no system notification yet).

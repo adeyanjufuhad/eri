@@ -104,8 +104,57 @@ class IgnoreRules extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+/// A debit, classified. `personal` = not a business cost (left out of net profit).
+class Expenses extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get bankEventId => integer().unique().references(BankEvents, #id)();
+  TextColumn get category => text()(); // ExpenseCategory.name
+  BoolColumn get setByUser => boolean().withDefault(const Constant(false))();
+}
+
+/// "I've paid" from a chat preview (opt-in). The preview text is on this phone only and wiped after 24 hours.
+class PaymentClaims extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get app => text()(); // WhatsApp | WhatsApp Business | Instagram
+  TextColumn get sender => text()();
+  IntColumn get amountKobo => integer().nullable()();
+  TextColumn get preview => text().nullable()();
+  TextColumn get previewHash => text().unique()();
+  DateTimeColumn get claimedAt => dateTime()();
+  DateTimeColumn get expiresAt => dateTime()();
+  TextColumn get status => text()(); // pending | verified | mismatch | not_received
+  IntColumn get bankEventId => integer().nullable().references(BankEvents, #id)();
+  BoolColumn get dismissed => boolean().withDefault(const Constant(false))();
+}
+
+/// A shared receipt screenshot, checked against real credits. The image itself is never stored.
+class ReceiptChecks extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get amountKobo => integer().nullable()();
+  TextColumn get sender => text().nullable()();
+  TextColumn get bank => text().nullable()();
+  DateTimeColumn get receiptTime => dateTime().nullable()();
+  TextColumn get verdict => text()(); // landed | not_received | mismatch | unreadable
+  TextColumn get reasons => text()(); // one per line
+  IntColumn get bankEventId => integer().nullable().references(BankEvents, #id)();
+  TextColumn get imageHash => text().nullable()(); // sha256 of the image bytes, for the Canary network later
+  DateTimeColumn get checkedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
 @DriftDatabase(
-  tables: [RawNotifications, BankEvents, Products, StockMovements, Orders, OrderItems, Matches, IgnoreRules],
+  tables: [
+    RawNotifications,
+    BankEvents,
+    Products,
+    StockMovements,
+    Orders,
+    OrderItems,
+    Matches,
+    IgnoreRules,
+    Expenses,
+    PaymentClaims,
+    ReceiptChecks,
+  ],
 )
 class EriDb extends _$EriDb {
   EriDb([QueryExecutor? e])
@@ -119,7 +168,7 @@ class EriDb extends _$EriDb {
       );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -135,6 +184,12 @@ class EriDb extends _$EriDb {
           matches,
           ignoreRules,
         ]) {
+          await m.createTable(t);
+        }
+      }
+      if (from < 3) {
+        // Day 3: expenses, chat payment claims, receipt checks
+        for (final TableInfo<Table, dynamic> t in [expenses, paymentClaims, receiptChecks]) {
           await m.createTable(t);
         }
       }
@@ -166,9 +221,17 @@ class EriDb extends _$EriDb {
 
   Stream<List<OrderItem>> watchOrderItems() => select(orderItems).watch();
 
-  /// Raw text is kept 7 days at most.
-  Future<int> purgeOldRaw({DateTime? now}) {
-    final cutoff = (now ?? DateTime.now()).subtract(const Duration(days: 7));
+  Stream<List<Expense>> watchExpenses() => select(expenses).watch();
+
+  Stream<List<PaymentClaim>> watchClaims() =>
+      (select(paymentClaims)..orderBy([(t) => OrderingTerm.desc(t.claimedAt)])).watch();
+
+  /// Raw text is kept 7 days at most; chat previews 24 hours.
+  Future<int> purgeOldRaw({DateTime? now}) async {
+    final n = now ?? DateTime.now();
+    await (update(paymentClaims)..where((t) => t.claimedAt.isSmallerThanValue(n.subtract(const Duration(hours: 24)))))
+        .write(const PaymentClaimsCompanion(preview: Value(null)));
+    final cutoff = n.subtract(const Duration(days: 7));
     return (delete(rawNotifications)..where((t) => t.postedAt.isSmallerThanValue(cutoff))).go();
   }
 }
