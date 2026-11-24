@@ -53,6 +53,15 @@ class ProductsScreen extends ConsumerWidget {
                         padding: const EdgeInsets.all(16),
                         child: Row(
                           children: [
+                            CircleAvatar(
+                              radius: 22,
+                              backgroundColor: EriColors.primary.withValues(alpha: 0.1),
+                              child: Text(
+                                p.name.isEmpty ? '?' : p.name[0].toUpperCase(),
+                                style: const TextStyle(color: EriColors.primary, fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -90,3 +90,20 @@ Fuhad finds the radius-0 brutalist page too blocky and messy. Read each site's H
 | R8 | https://kuda.com | "The digital bank built for Nigerians" | 4px, cards 21px | Three numbered blocks (Send / Spend / Save), then a "Kuda vs others" table. Numbered steps = our 1-2-3. |
 
 **Direction we're taking:** a radius scale (10 / 16 / 24 / 32px + pill), pill buttons and tags, rounded stage and cards, one surface per section with more white space, and no HUD crosshairs, faint grids or rotated ticker. The first screen names the problem (fake "I've paid" screenshots) next to the answer (the real alert), like Wise and Mercury do.
+
+## Round 4: the app UI (24 Nov 2026, Pinterest, signed in, built-in browser)
+
+Fuhad asked to "rev up" the app UI with Pinterest references, a pill-shaped bottom bar, and Emil Kowalski's motion rules. Picked from two searches ("fintech mobile app ui light floating bottom navigation", "banking app ui light soft blue cards dashboard mobile") by thumbnail and description. Links only; no images saved.
+
+| # | Pin | What to borrow | Where |
+|---|---|---|---|
+| A1 | https://www.pinterest.com/pin/930204498055103714/ | Payno fintech (Orbix Studio): soft periwinkle hero card, big balance, white cards on a pale field | Today hero |
+| A2 | https://www.pinterest.com/pin/421157002679769685/ | Three-screen light fintech set: calm list rows, round avatars, generous spacing | Feed rows, Products |
+| A3 | https://www.pinterest.com/pin/231513237090887994/ | Card stack + round quick-action buttons under the balance | Quick actions row |
+| A4 | https://www.pinterest.com/pin/1103100502529514637/ | "Financial growth hub": section headers with a "See all" pill, rounded chips | Section headers |
+| A5 | https://www.pinterest.com/pin/1110770695652241520/ | Curvy bottom tab interaction (elastic). Borrow the floating bar, NOT the elastic bounce (used dozens of times a day) | Tab bar |
+| A6 | https://www.pinterest.com/pin/1142577367997094621/ | Minimal white/black floating nav pills | Tab bar |
+| A7 | https://www.pinterest.com/pin/1103100502530519416/ | Big numbers, small labels, one accent colour per state | Numbers, verdict colours |
+| A8 | https://www.pinterest.com/pin/1144618061581679244/ | Payment option cards with clear primary action | Needs-you card, receipt check |
+
+**Direction:** keep Eri's tokens (light, #3b5bff, verdict colours, radius scale). Add a gradient hero card on Today with the money-in number, a quick-actions row (Check receipt, New order, Add product), white 24px section cards, and a **dark floating pill tab bar** whose white highlight slides between tabs (transform only, ~180ms, no bounce: tabs are switched dozens of times a day).

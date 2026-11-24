@@ -22,140 +22,215 @@ class HomeScreen extends ConsumerWidget {
     final books = ref.watch(booksProvider);
     final v = Theme.of(context).extension<EriVerdicts>()!;
 
+    final h = DateTime.now().hour;
+    final greeting = h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening');
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('eri'),
-        actions: [
-          IconButton(
-            tooltip: 'Check a receipt',
-            icon: const Icon(Icons.fact_check_outlined),
-            onPressed: () => context.push('/receipt'),
-          ),
-          IconButton(
-            tooltip: 'Settings',
-            icon: const Icon(Icons.tune),
-            onPressed: () => showEriSheet<void>(context, (_) => const SettingsSheet()),
-          ),
-          IconButton(
-            tooltip: 'Alert log (on this phone)',
-            icon: const Icon(Icons.receipt_long_outlined),
-            onPressed: () => context.push('/debug'),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
-        children: [
-          if (!granted) ...[_PermissionBanner(onTap: () => context.go('/welcome')), const SizedBox(height: 12)],
-          EriCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        bottom: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          children: [
+            // header: who and when, with the two utilities as round buttons (Round 4, A2)
+            Row(
               children: [
-                const Text('Real money in today', style: TextStyle(color: EriColors.mutedForeground, fontSize: 13)),
-                const SizedBox(height: 6),
-                // the number counts up when money lands: the product's whole promise, in one motion
-                MoneyTicker(kobo: books.moneyInKobo, format: naira, style: display(38)),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    Pill('${books.salesCount} ${books.salesCount == 1 ? 'sale' : 'sales'}'),
-                    Pill(
-                      'Profit ${naira(books.profitKobo)}',
-                      color: v.landed.withValues(alpha: 0.12),
-                      textColor: v.landed,
-                    ),
-                    Pill('Spent ${naira(books.spentKobo)}'),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                // net = profit on what sold − business expenses (debits), so the vendor sees the real day
-                Text(
-                  'Net today ${naira(books.netKobo)}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: tabular,
-                    color: books.netKobo < 0 ? v.notReceived : EriColors.foreground,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(greeting, style: const TextStyle(color: EriColors.mutedForeground, fontSize: 14)),
+                      const SizedBox(height: 2),
+                      Text('Your money today', style: display(24)),
+                    ],
                   ),
+                ),
+                _RoundIcon(
+                  icon: Icons.receipt_long_outlined,
+                  tooltip: 'Alert log (on this phone)',
+                  onTap: () => context.push('/debug'),
+                ),
+                const SizedBox(width: 8),
+                _RoundIcon(
+                  icon: Icons.tune_rounded,
+                  tooltip: 'Settings',
+                  onTap: () => showEriSheet<void>(context, (_) => const SettingsSheet()),
                 ),
               ],
             ),
-          ),
-          if (books.lowStock.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final p in books.lowStock)
-                  Pill(
-                    'Low stock · ${p.name} · ${p.qtyOnHand} left',
-                    color: v.suspicious.withValues(alpha: 0.12),
-                    textColor: v.suspicious,
-                  ),
-              ],
-            ),
-          ],
-          // "I've paid" claims first: a fake one costs the vendor the goods
-          if (books.claims.isNotEmpty) ...[
-            SectionLabel('Payment claims (${books.claims.length})'),
-            for (final c in books.claims) ...[
-              EnterOnce(
-                key: ValueKey('claim-${c.id}-${c.status}'),
-                animate: justNow(c.claimedAt) || c.status != 'pending',
-                child: ClaimCard(c),
+            const SizedBox(height: 16),
+            if (!granted) ...[_PermissionBanner(onTap: () => context.go('/welcome')), const SizedBox(height: 12)],
+            // hero: the one number that matters, on Eri's blue (Round 4, A1)
+            Container(
+              padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(EriRadius.xl - 4),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [EriColors.primary, Color(0xFF5B6FFF), Color(0xFF8E9BFF)],
+                ),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x553B5BFF), blurRadius: 36, offset: Offset(0, 18), spreadRadius: -14),
+                ],
               ),
-              const SizedBox(height: 10),
-            ],
-          ],
-          if (books.needsYou.isNotEmpty) ...[
-            SectionLabel('Needs you (${books.needsYou.length})'),
-            // a credit that just landed rises in; once decided, the card leaves at once (no lingering gap)
-            for (final e in books.needsYou) ...[
-              EnterOnce(key: ValueKey('needs-${e.id}'), animate: justNow(e.occurredAt), child: NeedsYouCard(e)),
-              const SizedBox(height: 10),
-            ],
-          ],
-          const SectionLabel('Latest alerts'),
-          if (events.isEmpty)
-            const EriCard(
-              padding: EdgeInsets.all(24),
-              child: Text(
-                'Waiting for your first bank alert. To test, send ₦100 between two of your own accounts.',
-                style: TextStyle(color: EriColors.mutedForeground, height: 1.4),
-              ),
-            )
-          else
-            Material(
-              color: EriColors.card,
-              borderRadius: BorderRadius.circular(EriRadius.lg),
-              clipBehavior: Clip.antiAlias, // tap ripples show on the card, inside its rounded corners
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (final (i, e) in events.take(30).indexed) ...[
-                    if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
-                    EnterOnce(
-                      key: ValueKey('event-${e.id}'),
-                      animate: justNow(e.occurredAt),
-                      child: EventTile(
-                        e,
-                        label: books.labels[e.id],
-                        onReopen: switch (books.labels[e.id]) {
-                          null => null,
-                          final EventLabel l when l.expense != null => () => showEriSheet<void>(
-                            context,
-                            (_) => ExpenseSheet(e, l.expense!),
-                          ),
-                          _ => () => _reopen(context, ref, e),
-                        },
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Real money in today',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Color(0xDDFFFFFF), fontSize: 13),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(EriRadius.pill),
+                        ),
+                        child: const Text(
+                          'From bank alerts',
+                          style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // the number counts up when money lands: the product's whole promise, in one motion
+                  MoneyTicker(
+                    kobo: books.moneyInKobo,
+                    format: naira,
+                    style: display(42, color: Colors.white),
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _HeroPill('${books.salesCount} ${books.salesCount == 1 ? 'sale' : 'sales'}'),
+                      _HeroPill('Profit ${naira(books.profitKobo)}'),
+                      _HeroPill('Spent ${naira(books.spentKobo)}'),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Container(height: 1, color: Colors.white.withValues(alpha: 0.18)),
+                  const SizedBox(height: 12),
+                  // net = profit on what sold − business expenses (debits), so the vendor sees the real day
+                  Row(
+                    children: [
+                      const Text('Net today', style: TextStyle(color: Color(0xDDFFFFFF))),
+                      const Spacer(),
+                      Text(
+                        naira(books.netKobo),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          fontFeatures: tabular,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-        ],
+            const SizedBox(height: 18),
+            // quick actions, the way banking apps put Send / Receive under the balance (Round 4, A3)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _QuickAction(
+                  icon: Icons.fact_check_outlined,
+                  label: 'Check receipt',
+                  onTap: () => context.push('/receipt'),
+                ),
+                _QuickAction(
+                  icon: Icons.add_shopping_cart_rounded,
+                  label: 'New order',
+                  onTap: () => context.go('/orders'),
+                ),
+                _QuickAction(icon: Icons.inventory_2_outlined, label: 'Products', onTap: () => context.go('/products')),
+              ],
+            ),
+            if (books.lowStock.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final p in books.lowStock)
+                    Pill(
+                      'Low stock · ${p.name} · ${p.qtyOnHand} left',
+                      color: v.suspicious.withValues(alpha: 0.12),
+                      textColor: v.suspicious,
+                    ),
+                ],
+              ),
+            ],
+            // "I've paid" claims first: a fake one costs the vendor the goods
+            if (books.claims.isNotEmpty) ...[
+              SectionLabel('Payment claims (${books.claims.length})'),
+              for (final c in books.claims) ...[
+                EnterOnce(
+                  key: ValueKey('claim-${c.id}-${c.status}'),
+                  animate: justNow(c.claimedAt) || c.status != 'pending',
+                  child: ClaimCard(c),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ],
+            if (books.needsYou.isNotEmpty) ...[
+              SectionLabel('Needs you (${books.needsYou.length})'),
+              // a credit that just landed rises in; once decided, the card leaves at once (no lingering gap)
+              for (final e in books.needsYou) ...[
+                EnterOnce(key: ValueKey('needs-${e.id}'), animate: justNow(e.occurredAt), child: NeedsYouCard(e)),
+                const SizedBox(height: 10),
+              ],
+            ],
+            const SectionLabel('Latest alerts'),
+            if (events.isEmpty)
+              const EriCard(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Waiting for your first bank alert. To test, send ₦100 between two of your own accounts.',
+                  style: TextStyle(color: EriColors.mutedForeground, height: 1.4),
+                ),
+              )
+            else
+              Material(
+                color: EriColors.card,
+                borderRadius: BorderRadius.circular(EriRadius.lg),
+                clipBehavior: Clip.antiAlias, // tap ripples show on the card, inside its rounded corners
+                child: Column(
+                  children: [
+                    for (final (i, e) in events.take(30).indexed) ...[
+                      if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
+                      EnterOnce(
+                        key: ValueKey('event-${e.id}'),
+                        animate: justNow(e.occurredAt),
+                        child: EventTile(
+                          e,
+                          label: books.labels[e.id],
+                          onReopen: switch (books.labels[e.id]) {
+                            null => null,
+                            final EventLabel l when l.expense != null => () => showEriSheet<void>(
+                              context,
+                              (_) => ExpenseSheet(e, l.expense!),
+                            ),
+                            _ => () => _reopen(context, ref, e),
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -449,6 +524,85 @@ class _PermissionBanner extends StatelessWidget {
                 'Eri can’t see your bank alerts yet. Tap to allow notification access.',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
               ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _RoundIcon extends StatelessWidget {
+  const _RoundIcon({required this.icon, required this.tooltip, required this.onTap});
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: tooltip,
+    child: PressScale(
+      child: Material(
+        color: EriColors.card,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Padding(padding: const EdgeInsets.all(11), child: Icon(icon, size: 20)),
+        ),
+      ),
+    ),
+  );
+}
+
+class _HeroPill extends StatelessWidget {
+  const _HeroPill(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: 0.16),
+      borderRadius: BorderRadius.circular(EriRadius.pill),
+    ),
+    child: Text(
+      label,
+      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600, fontFeatures: tabular),
+    ),
+  );
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => PressScale(
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: SizedBox(
+        width: 96,
+        child: Column(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: EriColors.card,
+                shape: BoxShape.circle,
+                boxShadow: const [BoxShadow(color: Color(0x140F141D), blurRadius: 18, offset: Offset(0, 8))],
+              ),
+              child: Icon(icon, color: EriColors.primary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ],
         ),

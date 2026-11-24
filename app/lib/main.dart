@@ -8,6 +8,7 @@ import 'package:eri/features/home_screen.dart';
 import 'package:eri/features/orders_screen.dart';
 import 'package:eri/features/products_screen.dart';
 import 'package:eri/features/receipt_screen.dart';
+import 'package:eri/features/tab_bar.dart';
 import 'package:eri/receipts/share.dart';
 import 'package:eri/features/welcome_screen.dart';
 import 'package:eri/listener/ingest.dart';
@@ -113,23 +114,21 @@ class _Tabs extends StatelessWidget {
   const _Tabs(this.shell);
   final StatefulNavigationShell shell;
 
+  static const _tabs = [
+    EriTab(Icons.today_outlined, Icons.today_rounded, 'Today'),
+    EriTab(Icons.inventory_2_outlined, Icons.inventory_2_rounded, 'Products'),
+    EriTab(Icons.receipt_outlined, Icons.receipt_rounded, 'Orders'),
+  ];
+
   @override
   Widget build(BuildContext context) => Scaffold(
+    // screens end above the bar (so add buttons and snackbars are never hidden behind it); the bar
+    // floats on the same background with its own margins
     body: shell,
-    bottomNavigationBar: NavigationBar(
-      // tabs switch dozens of times a day: the content swaps instantly, the indicator barely moves
-      animationDuration: const Duration(milliseconds: 150),
-      selectedIndex: shell.currentIndex,
-      onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
-      destinations: const [
-        NavigationDestination(icon: Icon(Icons.today_outlined), selectedIcon: Icon(Icons.today), label: 'Today'),
-        NavigationDestination(
-          icon: Icon(Icons.inventory_2_outlined),
-          selectedIcon: Icon(Icons.inventory_2),
-          label: 'Products',
-        ),
-        NavigationDestination(icon: Icon(Icons.receipt_outlined), selectedIcon: Icon(Icons.receipt), label: 'Orders'),
-      ],
+    bottomNavigationBar: EriTabBar(
+      tabs: _tabs,
+      index: shell.currentIndex,
+      onTap: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
     ),
   );
 }
