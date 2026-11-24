@@ -39,3 +39,10 @@
   - **Debits → expenses:** keyword rules (dispatch, ads, data & airtime, rent, supplier, other, not business); one-tap change, remembered per recipient. Today shows Spent and **Net today**.
 - **Checked:** analyze clean, 69/69 tests (engines + DB flows + the full-screen Day 2 test). Session-ID structure check NOT built (no confirmed format yet, per PLAN).
 - **Not done / to check on the phone:** OCR on real receipts; WhatsApp preview format for group chats; claim warnings only show in-app (no system notification yet).
+
+## Tue 24 Nov 2026 (Canary on Neon + UI revamp)
+- **Canary network (Day 4 item):** new Neon project **"eri"** (`solitary-lake-38011399`, London). Data API + Neon Auth anonymous guest tokens, so no secrets in the app. Table `scam_fingerprints` with RLS: guests may only insert (kind, hash, reporter); reading is denied (tested: 403); counts via `canary_count()` (last 30 days, distinct reporters). Only SHA-256 hashes leave the phone (normalised sender name, screenshot bytes, hashed random install id). "Flagged by N Eri vendors" on claims and receipt checks; "Warn other vendors" is a deliberate tap; Settings switch. Fuhad's older canary-* Neon projects are unrelated and untouched.
+- **UI revamp (Round 4 Pinterest refs, Emil rules):** dark floating pill tab bar (transform-only highlight, 180ms, no bounce), gradient hero on Today, quick-action row, round header buttons, product avatars.
+- **Checked:** analyze clean; 71/71 tests before the final one-line label fix (later runs blocked: disk full). Web preview builds; the browser pane crops the emulated phone, so the tab bar was verified by the widget test, not a screenshot.
+- **Blocker:** drive C: keeps filling (≈300 MB free). Builds and tests fail until several GB are freed.
+- **Note for the landing page:** its Canary copy says "1 report per vendor, so counts can't be faked". Reports are 1 per install, which a determined faker could game; soften that line.
