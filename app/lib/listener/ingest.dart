@@ -64,6 +64,10 @@ Future<int> ingest(EriDb db, Iterable<p.RawNotification> items, {Sales? sales, C
     await s.autoMatch(id);
     await s.autoExpense(id);
   }
-  if (added.isNotEmpty || chats.isNotEmpty) await c.resolve();
+  // judge claims at the time of the newest alert in this batch, not the wall clock: a replayed backlog must not
+  // mark a claim "not received" before the money alerts behind it are read. The periodic check uses real time.
+  if (added.isNotEmpty || chats.isNotEmpty) {
+    await c.resolve(now: items.map((n) => n.postedAt).reduce((a, b) => a.isAfter(b) ? a : b));
+  }
   return added.length;
 }
