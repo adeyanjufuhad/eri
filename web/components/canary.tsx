@@ -129,14 +129,14 @@ export function Canary() {
               warns everyone.
             </h2>
             <p className="mt-4 max-w-md text-sm text-muted-foreground sm:text-base">
-              When Eri catches a fake, it shares a fingerprint with other Eri vendors: a hash of the receipt image, the
-              sender&rsquo;s name and phone. The next vendor that scammer tries is warned before they ship.
+              When you catch a fake, one tap shares its fingerprint with other Eri vendors: a one-way hash of the
+              receipt image and the sender&rsquo;s name. The next vendor that scammer tries is warned before they ship.
             </p>
             <div className="mt-6 hidden max-w-md grid-cols-3 gap-2 md:grid">
               {[
                 ["Hashes", "only, never images"],
                 ["0", "names or numbers shared"],
-                ["1", "report per vendor, so counts can't be faked"],
+                ["1", "report per phone: repeats from one phone don't add up"],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-2xl bg-card p-3.5 shadow-soft">
                   <p className="font-display text-xl font-semibold tracking-[-0.03em]">{k}</p>
