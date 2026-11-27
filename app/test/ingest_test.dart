@@ -36,4 +36,29 @@ void main() {
     expect(await db.select(db.rawNotifications).get(), isEmpty);
     expect(await db.select(db.bankEvents).get(), hasLength(1)); // the parsed event stays
   });
+
+  test('two real payments with identical text both count (different post times)', () async {
+    const text = 'You have received ₦100.00 from ADA OBI.';
+    await ingest(db, [n(text, at: t), n(text, at: t.add(const Duration(minutes: 2)))]);
+    await ingest(db, [n(text, at: t)]); // a re-delivery of the first notification is still a duplicate
+    expect(await db.select(db.bankEvents).get(), hasLength(2));
+  });
+
+  test("a bank's app push and its SMS for the same payment count once", () async {
+    final push = p.RawNotification(
+      package: 'team.opay.pay',
+      title: 'Incoming Transfer Successful',
+      text: 'JOHN DOE has sent you ₦100.00.',
+      postedAt: t,
+    );
+    final sms = p.RawNotification(
+      package: 'com.google.android.apps.messaging',
+      title: 'OPayInfo',
+      text: 'JOHN DOE\nAcc:123****456\nAmt:NGN100.00\nBal:NGN305.88',
+      postedAt: t.add(const Duration(seconds: 13)),
+    );
+    await ingest(db, [push, sms]);
+    expect(await db.select(db.bankEvents).get(), hasLength(1));
+    expect(await db.select(db.rawNotifications).get(), hasLength(2)); // both kept in the on-phone log
+  });
 }
