@@ -126,21 +126,27 @@ class HomeScreen extends ConsumerWidget {
                     const SizedBox(height: 14),
                     Container(height: 1, color: Colors.white.withValues(alpha: 0.18)),
                     const SizedBox(height: 12),
-                    // net = profit on what sold − business expenses (debits), so the vendor sees the real day
-                    Row(
-                      children: [
-                        const Text('Net today', style: TextStyle(color: Color(0xDDFFFFFF))),
-                        const Spacer(),
-                        Text(
-                          naira(books.netKobo),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            fontFeatures: tabular,
+                    // net = profit on what sold + delivery − business expenses (the Books sum); tap for the full P&L
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => context.push('/books'),
+                      child: Row(
+                        children: [
+                          const Text('Net today', style: TextStyle(color: Color(0xDDFFFFFF))),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.chevron_right_rounded, size: 18, color: Color(0xDDFFFFFF)),
+                          const Spacer(),
+                          Text(
+                            naira(books.netKobo),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              fontFeatures: tabular,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -173,9 +179,9 @@ class HomeScreen extends ConsumerWidget {
                   RevealItem(
                     index: 2,
                     child: _QuickAction(
-                      icon: Icons.inventory_2_outlined,
-                      label: 'Products',
-                      onTap: () => context.go('/products'),
+                      icon: Icons.bar_chart_rounded,
+                      label: 'Books',
+                      onTap: () => context.push('/books'),
                     ),
                   ),
                 ],

@@ -36,7 +36,10 @@ void main() {
     }
     expect(await c.flags(sender: 'Tunde Bakare'), 3);
 
-    final offline = CanaryClient(installId: 'x', client: MockClient((_) async => throw http.ClientException('no network')));
+    final offline = CanaryClient(
+      installId: 'x',
+      client: MockClient((_) async => throw http.ClientException('no network')),
+    );
     expect(await offline.flags(sender: 'Tunde Bakare'), 0);
   });
 }

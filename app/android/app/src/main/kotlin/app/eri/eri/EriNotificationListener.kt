@@ -72,7 +72,9 @@ class EriNotificationListener : NotificationListenerService() {
             "com.teamapt.monnify.pos.moniepointapp",
             "com.kudabank.app",
             "com.palmpay.android",
+            "com.transsnet.palmpay", // confirmed on a Tecno KM7, 27 Nov
             "com.zenithBank.eazymoney",
+            "com.zenithbank.eazybyzenith",
             "com.ubanquity.ubamobilebanking",
             "com.accessbank.accessmobile",
         )

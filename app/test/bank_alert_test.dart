@@ -120,4 +120,34 @@ void main() {
     test('balance only', () => expect(parseAlert(n('Your available balance is NGN412,300.00')), isNull));
     test('chat with no money', () => expect(parseAlert(n('I have received the gown, thank you')), isNull));
   });
+
+  // REAL formats from a Tecno KM7 (27 Nov 2026), redacted: names, account digits and references are fake.
+  group('real phone samples (redacted)', () {
+    test('OPay credit with a promo tail is still a credit', () {
+      final a = parseAlert(
+        n(
+          'JOHN EMEKA DOE has sent you ₦100.00.  Get up to 6% bonus on OPay Airtime.',
+          title: 'Incoming Transfer Successful',
+          package: 'team.opay.pay',
+        ),
+      )!;
+      expect(a.bank, 'OPay');
+      expect(a.direction, Direction.credit);
+      expect(a.amountKobo, 10000);
+      expect(a.counterparty, 'JOHN EMEKA DOE');
+    });
+    test('Moniepoint debit names the recipient, without their bank or account', () {
+      final a = parseAlert(
+        n(
+          'Your account 123****456 was debited NGN100.00 for TRANSFER TO JANE ADA ROE OPay *****12345/TRF|2MPTabc1d|000000000000000000000. View in your Personal Banking app',
+          title: 'Debit alert',
+          package: 'com.moniepoint.personal',
+        ),
+      )!;
+      expect(a.bank, 'Moniepoint');
+      expect(a.direction, Direction.debit);
+      expect(a.amountKobo, 10000);
+      expect(a.counterparty, 'JANE ADA ROE');
+    });
+  });
 }

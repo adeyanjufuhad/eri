@@ -3,6 +3,7 @@ import 'package:eri/core/money.dart';
 import 'package:eri/core/time.dart';
 import 'package:eri/data/db.dart';
 import 'package:eri/listener/notification_bridge.dart';
+import 'package:eri/books/pnl.dart';
 import 'package:eri/canary/canary.dart';
 import 'package:eri/claims/claim_service.dart';
 import 'package:eri/matching/costing.dart';
@@ -89,6 +90,7 @@ class Books {
     required this.labels,
     required this.lowStock,
     required this.spentKobo,
+    required this.deliveryKobo,
     required this.claims,
   });
 
@@ -96,7 +98,12 @@ class Books {
 
   /// Business expenses today (debits, minus "not business").
   final int spentKobo;
-  int get netKobo => profitKobo - spentKobo;
+
+  /// Delivery fees collected on today's paid orders (they pay for the Dispatch expenses).
+  final int deliveryKobo;
+
+  /// Same sum as the Books screen (computePnl): gross profit + delivery − business expenses.
+  int get netKobo => profitKobo + deliveryKobo - spentKobo;
 
   /// "I've paid" claims still worth showing: waiting, or the money didn't come (last 24h, not dismissed).
   final List<PaymentClaim> claims;
@@ -153,27 +160,28 @@ final booksProvider = Provider<Books>((ref) {
   }
 
   final today = events.where((e) => sameDay(e.occurredAt, now));
-  final paidToday = orders.where((o) => o.status == 'paid' && o.paidAt != null && sameDay(o.paidAt!, now));
   final weekAgo = now.subtract(const Duration(days: 7));
+  final pnl = computePnl(
+    from: startOfDay(now),
+    to: startOfDay(now).add(const Duration(days: 1)),
+    orders: orders,
+    items: items,
+    events: events,
+    expenseByEvent: expenseByEvent,
+  );
 
   return Books(
     moneyInKobo: today.where((e) => e.direction == 'credit').fold(0, (s, e) => s + e.amountKobo),
     moneyOutKobo: today.where((e) => e.direction == 'debit').fold(0, (s, e) => s + e.amountKobo),
-    salesCount: paidToday.length,
-    profitKobo: paidToday.fold(0, (s, o) => s + profitOf(o.id)),
+    salesCount: pnl.salesCount,
+    profitKobo: pnl.grossProfitKobo,
+    deliveryKobo: pnl.deliveryKobo,
     needsYou: [
       for (final e in events)
         if (e.direction == 'credit' && !matchByEvent.containsKey(e.id) && e.occurredAt.isAfter(weekAgo)) e,
     ],
     labels: labels,
-    spentKobo: today
-        .where(
-          (e) =>
-              e.direction == 'debit' &&
-              expenseByEvent[e.id] != null &&
-              expenseByEvent[e.id] != ExpenseCategory.personal,
-        )
-        .fold(0, (s, e) => s + e.amountKobo),
+    spentKobo: pnl.expensesKobo,
     claims: [
       for (final c in claims)
         if (!c.dismissed && c.status != 'verified' && now.difference(c.claimedAt) < const Duration(hours: 24)) c,
@@ -184,3 +192,17 @@ final booksProvider = Provider<Books>((ref) {
     ],
   );
 });
+
+/// Everything the Books screen sums, in one place (the P&L itself is computed in lib/books/pnl.dart).
+final pnlSourceProvider =
+    Provider<({List<Order> orders, List<OrderItem> items, List<BankEvent> events, Map<int, ExpenseCategory> cats})>((
+      ref,
+    ) {
+      final expenses = ref.watch(expensesProvider).value ?? const [];
+      return (
+        orders: ref.watch(ordersProvider).value ?? const [],
+        items: ref.watch(orderItemsProvider).value ?? const [],
+        events: ref.watch(eventsProvider).value ?? const [],
+        cats: {for (final x in expenses) x.bankEventId: ExpenseCategory.fromName(x.category)},
+      );
+    });

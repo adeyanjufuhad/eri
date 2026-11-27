@@ -63,8 +63,8 @@ const banks = <BankProfile>[
     hints: ['moniepoint'],
   ),
   BankProfile('Kuda', packages: {'com.kudabank.app'}, hints: ['kuda']),
-  BankProfile('PalmPay', packages: {'com.palmpay.android'}, hints: ['palmpay']),
-  BankProfile('Zenith', packages: {'com.zenithBank.eazymoney'}, hints: ['zenith']),
+  BankProfile('PalmPay', packages: {'com.palmpay.android', 'com.transsnet.palmpay'}, hints: ['palmpay']),
+  BankProfile('Zenith', packages: {'com.zenithBank.eazymoney', 'com.zenithbank.eazybyzenith'}, hints: ['zenith']),
   BankProfile('UBA', packages: {'com.ubanquity.ubamobilebanking'}, hints: ['uba']),
   BankProfile('Access', packages: {'com.accessbank.accessmobile'}, hints: ['access bank', 'accessbank']),
 ];
@@ -84,17 +84,28 @@ final _debitCue = RegExp(
   caseSensitive: false,
 );
 
-// OTPs, tokens and promos mention naira too; they're never a payment.
-final _reject = RegExp(
-  r'\b(otp|token|one[- ]time|verification code|win|promo|bonus|giveaway|loan offer)\b',
+// OTPs and tokens mention naira too; they're never a payment.
+final _reject = RegExp(r'\b(otp|token|one[- ]time|verification code)\b', caseSensitive: false);
+// Promo words reject an alert only when nothing says a transfer happened: OPay appends
+// "Get up to 6% bonus on OPay Airtime." to real credit alerts (seen on a real phone, 27 Nov).
+final _promo = RegExp(r'\b(win|promo|bonus|giveaway|loan offer)\b', caseSensitive: false);
+final _transferHappened = RegExp(
+  r'\b(incoming transfer|sent you|credit(ed)? alert|debit(ed)? alert|credited|debited|received)\b',
   caseSensitive: false,
 );
 
 // a name runs until punctuation, a line break, " - ", or the next labelled field
 const _nameEnd =
-    r'(?=\s*(?:[.,|;\n]|\s-\s|\bdesc|\bnarration|\bremark|\bnote\b|\bref|\bsession|\bon\s+\d|\bat\s+\d|\bvia\b|[“"‘]|$))';
+    r'(?=\s*(?:[.,|;\n*]|\s\d|\s-\s|\bdesc|\bnarration|\bremark|\bnote\b|\bref|\bsession|\bon\s+\d|\bat\s+\d|\bvia\b|[“"‘]|$))';
 final _from = RegExp('\\b(?:from|sender)\\s*:?\\s+([A-Za-z][A-Za-z .\'&-]{1,40}?)$_nameEnd', caseSensitive: false);
 final _to = RegExp('\\b(?:to|beneficiary)\\s*:?\\s+([A-Za-z][A-Za-z .\'&-]{1,40}?)$_nameEnd', caseSensitive: false);
+// OPay credits: "Incoming Transfer Successful\nJOHN DOE has sent you ₦100.00."
+final _sentYou = RegExp(r"(?:^|\n)\s*([A-Za-z][A-Za-z .'&-]{1,40}?)\s+(?:has\s+)?sent you", caseSensitive: false);
+// Moniepoint debits name the recipient's bank after them: "TRANSFER TO JOHN DOE OPay *****123"
+final _trailingBank = RegExp(
+  r'\s+(opay|moniepoint|palmpay|kuda|gtbank|gtb|access|zenith|uba|first ?bank|wema|fcmb|sterling)$',
+  caseSensitive: false,
+);
 
 final _labelledNote = RegExp(
   r'\b(?:desc(?:ription)?|narration|remarks?|note|memo)\s*[:\-]\s*(.+?)(?=\s*(?:\n|\bavail|\bbal|\bdate|\bref|\btime|\bsession|$))',
@@ -108,6 +119,7 @@ final _session = RegExp(r'\bsession\s*(?:id)?\s*[:#]?\s*(\d{20,30})\b|\b(\d{30})
 BankAlert? parseAlert(RawNotification n) {
   final text = '${n.title}\n${n.text}'.trim();
   if (_reject.hasMatch(text)) return null;
+  if (_promo.hasMatch(text) && !_transferHappened.hasMatch(text)) return null;
 
   final amountKobo = _firstAmount(text);
   if (amountKobo == null || amountKobo <= 0) return null;
@@ -116,7 +128,9 @@ BankAlert? parseAlert(RawNotification n) {
   if (direction == null) return null;
 
   final bank = _bank(n);
-  final counterparty = _clean((direction == Direction.credit ? _from : _to).firstMatch(text)?.group(1));
+  final counterparty = direction == Direction.credit
+      ? _clean(_from.firstMatch(text)?.group(1) ?? _sentYou.firstMatch(text)?.group(1))
+      : _clean(_to.firstMatch(text)?.group(1))?.replaceFirst(_trailingBank, '');
   final narration = _clean(_labelledNote.firstMatch(text)?.group(1) ?? _quotedNote.firstMatch(text)?.group(1));
   final sm = _session.firstMatch(text);
   final sessionId = sm?.group(1) ?? sm?.group(2);

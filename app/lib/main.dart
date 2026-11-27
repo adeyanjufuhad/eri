@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eri/features/debug_feed_screen.dart';
+import 'package:eri/features/books_screen.dart';
 import 'package:eri/features/home_screen.dart';
 import 'package:eri/features/orders_screen.dart';
 import 'package:eri/features/products_screen.dart';
@@ -51,6 +52,7 @@ class _EriAppState extends ConsumerState<EriApp> {
       ),
       GoRoute(path: '/welcome', builder: (_, _) => const WelcomeScreen()),
       GoRoute(path: '/debug', builder: (_, _) => const DebugFeedScreen()),
+      GoRoute(path: '/books', builder: (_, _) => const BooksScreen()),
       GoRoute(
         path: '/receipt',
         builder: (_, state) => ReceiptScreen(sharedPath: state.extra as String?),
