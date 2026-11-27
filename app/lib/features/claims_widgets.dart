@@ -120,6 +120,7 @@ class SettingsSheet extends ConsumerWidget {
                     ? null
                     : (v) async {
                         await ref.read(bridgeProvider).setChatChecks(v);
+                        if (v) await ref.read(bridgeProvider).askToNotify(); // so a warning can reach the lock screen
                         ref.invalidate(chatChecksProvider);
                       },
                 title: const Text('Check “I’ve paid” messages', style: TextStyle(fontWeight: FontWeight.w600)),

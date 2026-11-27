@@ -30,6 +30,20 @@ class NotificationBridge {
     if (!kIsWeb) await _methods.invokeMethod<void>('setChatChecks', on);
   }
 
+  /// Android 13+ asks "Allow Eri to send notifications?" (once). Called when chat checks are turned on.
+  Future<void> askToNotify() async {
+    if (!kIsWeb) await _methods.invokeMethod<void>('askToNotify').catchError((_) {});
+  }
+
+  /// A system notification for a claim warning; false when notifications are off or unavailable.
+  Future<bool> notifyClaim(int id, String title, String body) async {
+    if (kIsWeb) return false;
+    return await _methods
+            .invokeMethod<bool>('notifyClaim', {'id': id, 'title': title, 'body': body})
+            .catchError((_) => false) ??
+        false;
+  }
+
   /// Fires whenever the listener queues something while the app is open.
   Stream<void> get pings => kIsWeb ? const Stream.empty() : _ping.receiveBroadcastStream().map((_) {});
 

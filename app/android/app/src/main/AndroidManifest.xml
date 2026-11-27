@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Google Fonts now, Supabase sync from Day 2. Raw notification text never goes over it. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13+: asked only when the vendor turns on "I've paid" checks, to warn about missing money -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:label="Eri"
         android:name="${applicationName}"

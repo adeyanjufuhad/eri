@@ -9,8 +9,11 @@ import 'package:eri/parsing/bank_alert.dart' as p;
 /// Stores "I've paid" claims from chat previews and settles them against real credits.
 /// Previews that aren't claims are dropped here and never stored.
 class Claims {
-  Claims(this.db);
+  Claims(this.db, {this.onFlagged});
   final EriDb db;
+
+  /// Called once for each claim that just turned into a warning (no money, or a different amount).
+  final Future<void> Function(PaymentClaim claim)? onFlagged;
 
   /// Returns how many new claims were recorded.
   Future<int> ingestChat(Iterable<p.RawNotification> previews) async {
@@ -41,10 +44,12 @@ class Claims {
   }
 
   /// Settles every pending claim it can: after a new credit, on a timer, and when the app comes back.
-  Future<void> resolve({DateTime? now}) async {
+  /// Returns the claims that just became warnings.
+  Future<List<PaymentClaim>> resolve({DateTime? now}) async {
     final at = now ?? DateTime.now();
     final pending = await (db.select(db.paymentClaims)..where((t) => t.status.equals('pending'))).get();
-    if (pending.isEmpty) return;
+    if (pending.isEmpty) return const [];
+    final flagged = <PaymentClaim>[];
     final credits = [
       for (final e in await (db.select(db.bankEvents)..where((t) => t.direction.equals('credit'))).get())
         ClaimCredit(id: e.id, amountKobo: e.amountKobo, occurredAt: e.occurredAt, counterparty: e.counterparty),
@@ -65,17 +70,25 @@ class Claims {
       );
       if (r.status == ClaimStatus.pending) continue;
       if (r.bankEventId != null) taken.add(r.bankEventId!);
-      await (db.update(db.paymentClaims)..where((t) => t.id.equals(c.id))).write(
-        PaymentClaimsCompanion(
-          status: Value(switch (r.status) {
-            ClaimStatus.verified => 'verified',
-            ClaimStatus.mismatch => 'mismatch',
-            _ => 'not_received',
-          }),
-          bankEventId: Value(r.bankEventId),
-        ),
+      final status = switch (r.status) {
+        ClaimStatus.verified => 'verified',
+        ClaimStatus.mismatch => 'mismatch',
+        _ => 'not_received',
+      };
+      // only the call that moves it out of 'pending' reports it, so a warning is never sent twice
+      final n = await (db.update(db.paymentClaims)..where((t) => t.id.equals(c.id) & t.status.equals('pending'))).write(
+        PaymentClaimsCompanion(status: Value(status), bankEventId: Value(r.bankEventId)),
       );
+      if (n == 1 && status != 'verified') flagged.add(c.copyWith(status: status, bankEventId: Value(r.bankEventId)));
     }
+    for (final c in flagged) {
+      try {
+        await onFlagged?.call(c);
+      } catch (_) {
+        // a failed notification must never undo or block the books
+      }
+    }
+    return flagged;
   }
 
   /// The vendor checked their bank app and the money is there (e.g. paid from someone else's account).

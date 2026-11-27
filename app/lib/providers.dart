@@ -5,6 +5,7 @@ import 'package:eri/data/db.dart';
 import 'package:eri/listener/notification_bridge.dart';
 import 'package:eri/books/pnl.dart';
 import 'package:eri/canary/canary.dart';
+import 'package:eri/claims/claim_alerts.dart';
 import 'package:eri/claims/claim_service.dart';
 import 'package:eri/matching/costing.dart';
 import 'package:eri/matching/expenses.dart';
@@ -21,7 +22,10 @@ final dbProvider = Provider<EriDb>((ref) {
 final bridgeProvider = Provider<NotificationBridge>((_) => NotificationBridge());
 
 final salesProvider = Provider<Sales>((ref) => Sales(ref.watch(dbProvider)));
-final claimsProvider = Provider<Claims>((ref) => Claims(ref.watch(dbProvider)));
+final claimsProvider = Provider<Claims>((ref) {
+  final bridge = ref.watch(bridgeProvider);
+  return Claims(ref.watch(dbProvider), onFlagged: (c) => warnOnPhone(bridge, c));
+});
 final receiptsProvider = Provider<Receipts>((ref) => Receipts(ref.watch(dbProvider)));
 
 final expensesProvider = StreamProvider<List<Expense>>((ref) => ref.watch(dbProvider).watchExpenses());
